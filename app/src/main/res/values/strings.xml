@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">පංචය</string>
+    <string name="app_subtitle">Jethavanarama &amp; Pahura</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_jethavanarama">Main</string>
+    <string name="tab_pahura">Pahura</string>
+    <string name="tab_downloads">Downloads</string>
+    <string name="playback_notification_channel_name">පංචය - ධර්ම දේශනා වාදකය</string>
+</resources>
