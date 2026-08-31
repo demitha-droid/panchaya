@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -44,6 +45,7 @@ fun HomeScreen(
     onPlaySermon: (Sermon, List<Sermon>) -> Unit,
     onDownloadSermon: (Sermon) -> Unit,
     onRefresh: () -> Unit,
+    onOpenSettings: () -> Unit,
     onNavigateToJethavanarama: () -> Unit,
     onNavigateToPahura: () -> Unit
 ) {
@@ -106,15 +108,15 @@ fun HomeScreen(
                         }
 
                         IconButton(
-                            onClick = onRefresh,
+                            onClick = onOpenSettings,
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(CircleShape)
                                 .background(SurfaceCard)
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Refresh,
-                                contentDescription = "Refresh",
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = "Settings",
                                 tint = SaffronPrimary,
                                 modifier = Modifier.size(20.dp)
                             )

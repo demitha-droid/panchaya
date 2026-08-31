@@ -36,6 +36,7 @@ import androidx.media3.common.util.UnstableApi
 import org.jethavanarama.dhammasermons.data.model.DownloadState
 import org.jethavanarama.dhammasermons.ui.components.FullPlayerSheet
 import org.jethavanarama.dhammasermons.ui.components.MiniPlayer
+import org.jethavanarama.dhammasermons.ui.components.SettingsSheet
 import org.jethavanarama.dhammasermons.ui.screens.DownloadsScreen
 import org.jethavanarama.dhammasermons.ui.screens.HomeScreen
 import org.jethavanarama.dhammasermons.ui.screens.JethavanaramaScreen
@@ -81,7 +82,8 @@ class MainActivity : ComponentActivity() {
         handleNotificationIntent(intent)
 
         setContent {
-            DhammaSermonsTheme {
+            val themeMode by viewModel.themeMode.collectAsState()
+            DhammaSermonsTheme(themeMode = themeMode) {
                 MainAppScaffold(viewModel = viewModel)
             }
         }
@@ -126,6 +128,7 @@ class MainActivity : ComponentActivity() {
 fun MainAppScaffold(viewModel: MainViewModel) {
     var selectedTab by remember { mutableStateOf(NavTab.HOME) }
     var isFullPlayerVisible by remember { mutableStateOf(false) }
+    var showSettingsSheet by remember { mutableStateOf(false) }
 
     val homeSermons by viewModel.homeSermons.collectAsState()
     val jethavanaramaPaginated by viewModel.jethavanaramaPaginated.collectAsState()
@@ -218,6 +221,7 @@ fun MainAppScaffold(viewModel: MainViewModel) {
                         onPlaySermon = { sermon, queue -> viewModel.playSermon(sermon, queue) },
                         onDownloadSermon = { sermon -> viewModel.startDownload(sermon) },
                         onRefresh = { viewModel.loadHomeFeed() },
+                        onOpenSettings = { showSettingsSheet = true },
                         onNavigateToJethavanarama = { selectedTab = NavTab.JETHAVANARAMA },
                         onNavigateToPahura = { selectedTab = NavTab.PAHURA }
                     )
@@ -321,6 +325,17 @@ fun MainAppScaffold(viewModel: MainViewModel) {
                     onSpeedChange = { speed -> viewModel.setPlaybackSpeed(speed) },
                     onSleepTimerSet = { mins -> viewModel.setSleepTimer(mins) },
                     onDownloadClick = { viewModel.startDownload(curSermon) }
+                )
+            }
+
+            // Settings Modal Bottom Sheet
+            if (showSettingsSheet) {
+                val currentThemeMode by viewModel.themeMode.collectAsState()
+                SettingsSheet(
+                    currentThemeMode = currentThemeMode,
+                    onThemeModeSelect = { viewModel.setThemeMode(it) },
+                    onRefreshFeeds = { viewModel.refreshAllFeeds(forceNetworkRefresh = true) },
+                    onDismiss = { showSettingsSheet = false }
                 )
             }
         }

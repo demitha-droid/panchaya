@@ -22,6 +22,7 @@ import org.jethavanarama.dhammasermons.data.model.SermonCategory
 import org.jethavanarama.dhammasermons.data.model.Thero
 import org.jethavanarama.dhammasermons.player.AudioPlayerManager
 import org.jethavanarama.dhammasermons.player.PlayerUiState
+import org.jethavanarama.dhammasermons.ui.theme.ThemeMode
 
 @UnstableApi
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -31,6 +32,23 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val downloadManager: SermonDownloadManager = app.downloadManager
     private val db = AppDatabase.getDatabase(application)
     private val sermonDao = db.sermonDao()
+    private val prefs = application.getSharedPreferences("panchaya_settings", android.content.Context.MODE_PRIVATE)
+
+    // Theme Mode
+    private val _themeMode = MutableStateFlow(
+        try {
+            val saved = prefs.getString("theme_mode", ThemeMode.LIGHT_KYOTO.name)
+            ThemeMode.valueOf(saved ?: ThemeMode.LIGHT_KYOTO.name)
+        } catch (e: Exception) {
+            ThemeMode.LIGHT_KYOTO
+        }
+    )
+    val themeMode: StateFlow<ThemeMode> = _themeMode.asStateFlow()
+
+    fun setThemeMode(mode: ThemeMode) {
+        _themeMode.value = mode
+        prefs.edit().putString("theme_mode", mode.name).apply()
+    }
 
     private val jethavanaramaExtractor = JethavanaramaExtractor()
     private val pahuraExtractor = PahuraYouTubeExtractor()
