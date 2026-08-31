@@ -3,6 +3,7 @@ package org.jethavanarama.dhammasermons.ui.screens
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,6 +14,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -210,7 +213,7 @@ fun NewsScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Article,
+                            imageVector = Icons.AutoMirrored.Filled.Article,
                             contentDescription = null,
                             tint = TextMuted,
                             modifier = Modifier.size(48.dp)
@@ -402,7 +405,8 @@ fun NewsCard(
 ) {
     Card(
         colors = CardDefaults.cardColors(containerColor = SurfaceCard),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(18.dp),
+        border = BorderStroke(1.dp, BorderSubtle),
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onReadMore() }
@@ -419,7 +423,7 @@ fun NewsCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp)
-                        .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                        .clip(RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp))
                 )
             }
 
@@ -431,7 +435,7 @@ fun NewsCard(
                 if (!news.dateText.isNullOrBlank()) {
                     Surface(
                         color = SaffronPrimary.copy(alpha = 0.15f),
-                        shape = RoundedCornerShape(4.dp),
+                        shape = RoundedCornerShape(6.dp),
                         modifier = Modifier.padding(bottom = 6.dp)
                     ) {
                         Text(
@@ -439,7 +443,7 @@ fun NewsCard(
                             color = SaffronGold,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                         )
                     }
                 }
@@ -492,7 +496,7 @@ fun NewsCard(
                                 fontWeight = FontWeight.Bold
                             )
                             Icon(
-                                imageVector = Icons.Default.ArrowForward,
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                 contentDescription = null,
                                 tint = SaffronGold,
                                 modifier = Modifier.size(14.dp)

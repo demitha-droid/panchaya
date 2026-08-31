@@ -12,13 +12,13 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Article
+import androidx.compose.material.icons.automirrored.filled.Article
+import androidx.compose.material.icons.automirrored.outlined.Article
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.PlayCircleFilled
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.Subscriptions
-import androidx.compose.material.icons.outlined.Article
 import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.PlayCircleOutline
@@ -54,7 +54,7 @@ enum class NavTab(
     JETHAVANARAMA("Main", Icons.Filled.SelfImprovement, Icons.Outlined.SelfImprovement),
     PAHURA("Pahura", Icons.Filled.Subscriptions, Icons.Outlined.Subscriptions),
     SHORTS("Shorts", Icons.Filled.PlayCircleFilled, Icons.Outlined.PlayCircleOutline),
-    NEWS("News", Icons.Filled.Article, Icons.Outlined.Article),
+    NEWS("News", Icons.AutoMirrored.Filled.Article, Icons.AutoMirrored.Outlined.Article),
     DOWNLOADS("Downloads", Icons.Filled.CloudDownload, Icons.Outlined.CloudDownload)
 }
 

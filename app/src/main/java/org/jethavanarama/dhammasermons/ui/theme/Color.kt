@@ -2,26 +2,27 @@ package org.jethavanarama.dhammasermons.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Serene Minimal Dark Palette
-val BackgroundDark = Color(0xFF0F1115)
-val SurfaceDark = Color(0xFF161920)
-val SurfaceCard = Color(0xFF1D212A)
-val SurfaceHighlight = Color(0xFF262C38)
-val BorderDark = Color(0xFF2C3240)
+// Sacred Obsidian & Liquid Amber Palette (OLED Void + Molten Gold)
+val BackgroundDark = Color(0xFF080705)       // True OLED pitch black
+val SurfaceDark = Color(0xFF100E0C)          // Obsidian Glass surface
+val SurfaceCard = Color(0xFF16130F)          // Translucent dark card surface
+val SurfaceHighlight = Color(0xFF221A11)     // Glowing Amber card surface
+val BorderDark = Color(0x33F59E0B)           // Luminous Amber hairline border (20% alpha)
+val BorderSubtle = Color(0x1AFDFBF7)         // Subtle ivory hairline border (10% alpha)
 
-// Sacred Saffron / Amber Accents
-val SaffronPrimary = Color(0xFFE5A93B)
-val SaffronGold = Color(0xFFFFC043)
-val SaffronLight = Color(0xFFFFD57E)
-val SaffronDark = Color(0xFFB57C17)
+// Sacred Saffron / Molten Amber Accents
+val SaffronPrimary = Color(0xFFF59E0B)       // Molten Liquid Amber
+val SaffronGold = Color(0xFFFBBF24)          // Radiant Sun Gold
+val SaffronLight = Color(0xFFFDE68A)         // Luminous Warm Amber Glow
+val SaffronDark = Color(0xFFB45309)          // Deep Monastery Ochre
 
-// Neutral & Text
-val TextPrimary = Color(0xFFF7F8FA)
-val TextSecondary = Color(0xFFA0A6B5)
-val TextMuted = Color(0xFF6B7280)
+// High-Contrast Sacred Neutral & Text
+val TextPrimary = Color(0xFFFDFBF7)          // Luminous Parchment Ivory
+val TextSecondary = Color(0xFFD1C7B7)        // Warm Silk Grey
+val TextMuted = Color(0xFF8C8275)            // Soft Temple Ash
 
 // Accents & Badges
-val SageLotus = Color(0xFF8BA888)
-val AccentPahuraRed = Color(0xFFE0534C)
-val AccentJethavanaramaGold = Color(0xFFD49A3D)
-val AccentOfflineGreen = Color(0xFF4EBA6F)
+val SageLotus = Color(0xFF94B49F)            // Serene Lotus Sage
+val AccentPahuraRed = Color(0xFFEF4444)      // Radiant Crimson
+val AccentJethavanaramaGold = Color(0xFFF59E0B) // Pure Liquid Amber
+val AccentOfflineGreen = Color(0xFF10B981)   // Emerald Offline Indicator

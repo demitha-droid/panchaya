@@ -7,6 +7,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
@@ -25,6 +26,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
@@ -71,6 +74,15 @@ fun MiniPlayer(
     // Calculate alpha based on drag distance
     val dragAlpha = (1f - (abs(offsetX.value) / maxDragPx)).coerceIn(0.2f, 1f)
 
+    val borderBrush = Brush.horizontalGradient(
+        listOf(
+            SaffronDark.copy(alpha = 0.4f),
+            SaffronPrimary.copy(alpha = 0.8f),
+            SaffronGold.copy(alpha = 0.9f),
+            SaffronPrimary.copy(alpha = 0.5f)
+        )
+    )
+
     AnimatedVisibility(
         visible = !isDismissed,
         exit = fadeOut(tween(180)) + slideOutHorizontally(targetOffsetX = { if (offsetX.value >= 0) it else -it }),
@@ -108,35 +120,45 @@ fun MiniPlayer(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(18.dp))
                     .clickable(onClick = onClick),
                 color = SurfaceCard,
+                border = BorderStroke(1.2.dp, borderBrush),
                 tonalElevation = 8.dp,
-                shadowElevation = 12.dp,
-                shape = RoundedCornerShape(16.dp)
+                shadowElevation = 14.dp,
+                shape = RoundedCornerShape(18.dp)
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    // Subtle top progress bar
-                    LinearProgressIndicator(
-                        progress = { progress },
+                    // Liquid Amber progress bar
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(2.5.dp),
-                        color = SaffronPrimary,
-                        trackColor = SurfaceHighlight
-                    )
+                            .height(3.dp)
+                            .background(SurfaceHighlight)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(progress)
+                                .fillMaxHeight()
+                                .background(
+                                    Brush.horizontalGradient(
+                                        listOf(SaffronDark, SaffronPrimary, SaffronGold)
+                                    )
+                                )
+                        )
+                    }
 
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                            .padding(horizontal = 12.dp, vertical = 9.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Thumbnail
+                        // Thumbnail with Live Waveform Badge
                         Box(
                             modifier = Modifier
-                                .size(46.dp)
-                                .clip(RoundedCornerShape(10.dp))
+                                .size(48.dp)
+                                .clip(RoundedCornerShape(12.dp))
                                 .background(SurfaceDark),
                             contentAlignment = Alignment.Center
                         ) {
@@ -147,6 +169,23 @@ fun MiniPlayer(
                                     modifier = Modifier.fillMaxSize(),
                                     contentScale = ContentScale.Crop
                                 )
+                            }
+                            if (playerState.isPlaying) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color.Black.copy(alpha = 0.4f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    LiveWaveformVisualizer(
+                                        isPlaying = true,
+                                        barColor = SaffronGold,
+                                        barCount = 3,
+                                        barWidth = 2.dp,
+                                        maxHeight = 12.dp,
+                                        minHeight = 4.dp
+                                    )
+                                }
                             }
                         }
 
@@ -160,7 +199,8 @@ fun MiniPlayer(
                                 text = sermon.title,
                                 style = MaterialTheme.typography.titleMedium.copy(
                                     fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = SaffronGold
                                 ),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
@@ -189,19 +229,19 @@ fun MiniPlayer(
 
                         Spacer(modifier = Modifier.width(4.dp))
 
-                        // Play / Pause
+                        // Play / Pause glowing dial
                         IconButton(
                             onClick = onPlayPauseClick,
                             modifier = Modifier
-                                .size(40.dp)
+                                .size(42.dp)
                                 .clip(CircleShape)
-                                .background(SaffronPrimary)
+                                .background(Brush.radialGradient(listOf(SaffronGold, SaffronPrimary)))
                         ) {
                             if (playerState.isBuffering) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(20.dp),
                                     color = BackgroundDark,
-                                    strokeWidth = 2.dp
+                                    strokeWidth = 2.5.dp
                                 )
                             } else {
                                 Icon(

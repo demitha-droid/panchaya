@@ -1,6 +1,7 @@
 package org.jethavanarama.dhammasermons.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,7 +19,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -40,16 +44,31 @@ fun SermonCard(
     onDownloadClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val cardBorder = if (isCurrent) {
+        BorderStroke(
+            width = 1.2.dp,
+            brush = Brush.linearGradient(
+                listOf(
+                    SaffronPrimary,
+                    SaffronGold.copy(alpha = 0.8f),
+                    SaffronDark.copy(alpha = 0.4f)
+                )
+            )
+        )
+    } else {
+        BorderStroke(width = 1.dp, color = BorderSubtle)
+    }
+
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(18.dp))
             .clickable(onClick = onPlayClick),
         colors = CardDefaults.cardColors(
             containerColor = if (isCurrent) SurfaceHighlight else SurfaceCard
         ),
-        shape = RoundedCornerShape(16.dp),
-        border = if (isCurrent) CardDefaults.outlinedCardBorder().copy(brush = androidx.compose.ui.graphics.SolidColor(SaffronPrimary.copy(alpha = 0.6f))) else null
+        shape = RoundedCornerShape(18.dp),
+        border = cardBorder
     ) {
         Row(
             modifier = Modifier
@@ -57,20 +76,20 @@ fun SermonCard(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Thumbnail with Play overlay & Duration badge
+            // Thumbnail with Play overlay & Live Waveform
             Box(
                 modifier = Modifier
-                    .size(76.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .size(78.dp)
+                    .clip(RoundedCornerShape(14.dp))
                     .background(SurfaceDark),
                 contentAlignment = Alignment.Center
             ) {
-                // Saffron / Red Source icon placeholder
+                // Background icon placeholder
                 Icon(
                     imageVector = if (sermon.source == SermonSource.PAHURA_YOUTUBE) Icons.Default.Subscriptions else Icons.Default.SelfImprovement,
                     contentDescription = null,
-                    tint = if (sermon.source == SermonSource.PAHURA_YOUTUBE) AccentPahuraRed.copy(alpha = 0.4f) else SaffronPrimary.copy(alpha = 0.4f),
-                    modifier = Modifier.size(32.dp)
+                    tint = if (sermon.source == SermonSource.PAHURA_YOUTUBE) AccentPahuraRed.copy(alpha = 0.35f) else SaffronPrimary.copy(alpha = 0.35f),
+                    modifier = Modifier.size(34.dp)
                 )
 
                 if (!sermon.thumbnailUrl.isNullOrBlank()) {
@@ -87,33 +106,41 @@ fun SermonCard(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.5f)),
+                            .background(Color.Black.copy(alpha = 0.55f)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                            contentDescription = "Playing",
-                            tint = SaffronGold,
-                            modifier = Modifier.size(28.dp)
-                        )
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(Brush.radialGradient(listOf(SaffronGold, SaffronPrimary))),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                contentDescription = "Playback",
+                                tint = BackgroundDark,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
                     }
                 }
 
                 // Duration badge on thumbnail (bottom-end)
                 if (sermon.durationFormatted != null && !isCurrent) {
                     Surface(
-                        color = Color.Black.copy(alpha = 0.8f),
-                        shape = RoundedCornerShape(4.dp),
+                        color = Color.Black.copy(alpha = 0.85f),
+                        shape = RoundedCornerShape(6.dp),
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .padding(4.dp)
                     ) {
                         Text(
                             text = sermon.durationFormatted!!,
-                            color = Color.White,
+                            color = SaffronLight,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
                         )
                     }
                 }
@@ -125,32 +152,43 @@ fun SermonCard(
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                // Source badge, Date & Duration
+                // Source badge, Live waveform & Duration
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Surface(
-                        color = if (sermon.source == SermonSource.PAHURA_YOUTUBE) AccentPahuraRed.copy(alpha = 0.15f) else AccentJethavanaramaGold.copy(alpha = 0.15f),
-                        shape = RoundedCornerShape(4.dp)
+                        color = if (sermon.source == SermonSource.PAHURA_YOUTUBE) AccentPahuraRed.copy(alpha = 0.15f) else SaffronPrimary.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(6.dp),
+                        border = BorderStroke(0.8.dp, if (sermon.source == SermonSource.PAHURA_YOUTUBE) AccentPahuraRed.copy(alpha = 0.3f) else SaffronPrimary.copy(alpha = 0.3f))
                     ) {
                         Text(
                             text = if (sermon.source == SermonSource.PAHURA_YOUTUBE) "පහුර" else "ජෙතවනාරාමය",
-                            color = if (sermon.source == SermonSource.PAHURA_YOUTUBE) AccentPahuraRed else AccentJethavanaramaGold,
+                            color = if (sermon.source == SermonSource.PAHURA_YOUTUBE) AccentPahuraRed else SaffronGold,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                         )
                     }
 
-                    if (sermon.durationFormatted != null) {
+                    if (isCurrent && isPlaying) {
+                        LiveWaveformVisualizer(
+                            isPlaying = true,
+                            barColor = SaffronGold,
+                            barCount = 4,
+                            barWidth = 2.dp,
+                            maxHeight = 12.dp,
+                            minHeight = 4.dp
+                        )
+                    } else if (sermon.durationFormatted != null) {
                         Surface(
-                            color = SurfaceHighlight,
-                            shape = RoundedCornerShape(4.dp)
+                            color = SurfaceDark,
+                            shape = RoundedCornerShape(6.dp),
+                            border = BorderStroke(0.5.dp, BorderSubtle)
                         ) {
                             Text(
                                 text = sermon.durationFormatted!!,
-                                color = SaffronGold,
+                                color = SaffronLight,
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
@@ -169,7 +207,7 @@ fun SermonCard(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(5.dp))
 
                 // Title
                 Text(
@@ -235,7 +273,7 @@ fun SermonCard(
                             modifier = Modifier
                                 .size(36.dp)
                                 .clip(CircleShape)
-                                .background(SurfaceHighlight.copy(alpha = 0.5f))
+                                .background(SurfaceDark)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Download,

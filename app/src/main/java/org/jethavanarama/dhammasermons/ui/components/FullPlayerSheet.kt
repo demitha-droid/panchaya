@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -56,6 +57,17 @@ fun FullPlayerSheet(
     val currentPos = if (isUserSeeking) seekPositionMs else playerState.currentPositionMs
     val duration = playerState.durationMs
 
+    val artworkBorder = BorderStroke(
+        width = 1.5.dp,
+        brush = Brush.linearGradient(
+            listOf(
+                SaffronPrimary.copy(alpha = 0.7f),
+                SaffronGold.copy(alpha = 0.9f),
+                SaffronDark.copy(alpha = 0.4f)
+            )
+        )
+    )
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
@@ -64,10 +76,10 @@ fun FullPlayerSheet(
             Surface(
                 modifier = Modifier
                     .padding(vertical = 12.dp)
-                    .width(40.dp)
+                    .width(44.dp)
                     .height(4.dp),
                 shape = CircleShape,
-                color = BorderDark
+                color = SaffronPrimary.copy(alpha = 0.4f)
             ) {}
         }
     ) {
@@ -94,12 +106,13 @@ fun FullPlayerSheet(
                 }
 
                 Surface(
-                    color = if (sermon.source == SermonSource.PAHURA_YOUTUBE) AccentPahuraRed.copy(alpha = 0.15f) else AccentJethavanaramaGold.copy(alpha = 0.15f),
-                    shape = RoundedCornerShape(8.dp)
+                    color = if (sermon.source == SermonSource.PAHURA_YOUTUBE) AccentPahuraRed.copy(alpha = 0.15f) else SaffronPrimary.copy(alpha = 0.15f),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(0.8.dp, if (sermon.source == SermonSource.PAHURA_YOUTUBE) AccentPahuraRed.copy(alpha = 0.3f) else SaffronPrimary.copy(alpha = 0.3f))
                 ) {
                     Text(
                         text = if (sermon.source == SermonSource.PAHURA_YOUTUBE) "පහුර YOUTUBE" else "ජෙතවනාරාමය",
-                        color = if (sermon.source == SermonSource.PAHURA_YOUTUBE) AccentPahuraRed else AccentJethavanaramaGold,
+                        color = if (sermon.source == SermonSource.PAHURA_YOUTUBE) AccentPahuraRed else SaffronGold,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
@@ -136,34 +149,40 @@ fun FullPlayerSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Large Artwork
-            Box(
+            // Large Artwork with Golden Halo Border
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1.2f)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(SurfaceCard)
-                    .shadow(16.dp, RoundedCornerShape(24.dp)),
-                contentAlignment = Alignment.Center
+                    .clip(RoundedCornerShape(24.dp)),
+                shape = RoundedCornerShape(24.dp),
+                border = artworkBorder,
+                color = SurfaceCard,
+                shadowElevation = 16.dp
             ) {
-                if (!sermon.thumbnailUrl.isNullOrBlank()) {
-                    AsyncImage(
-                        model = sermon.thumbnailUrl,
-                        contentDescription = sermon.title,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.LibraryMusic,
-                        contentDescription = null,
-                        tint = SaffronPrimary.copy(alpha = 0.5f),
-                        modifier = Modifier.size(72.dp)
-                    )
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (!sermon.thumbnailUrl.isNullOrBlank()) {
+                        AsyncImage(
+                            model = sermon.thumbnailUrl,
+                            contentDescription = sermon.title,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.LibraryMusic,
+                            contentDescription = null,
+                            tint = SaffronPrimary.copy(alpha = 0.5f),
+                            modifier = Modifier.size(72.dp)
+                        )
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(22.dp))
 
             // Title & Thero
             Text(
@@ -178,7 +197,7 @@ fun FullPlayerSheet(
                 overflow = TextOverflow.Ellipsis
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             Text(
                 text = sermon.thero,
@@ -189,9 +208,22 @@ fun FullPlayerSheet(
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            // Seek Slider
+            // Live Audio Waveform Visualizer
+            LiveWaveformVisualizer(
+                isPlaying = playerState.isPlaying,
+                modifier = Modifier.height(28.dp),
+                barColor = SaffronPrimary,
+                barCount = 18,
+                barWidth = 3.dp,
+                maxHeight = 26.dp,
+                minHeight = 6.dp
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Seek Slider with Liquid Amber Colors
             Slider(
                 value = if (duration > 0) currentPos.toFloat() / duration.toFloat() else 0f,
                 onValueChange = { frac ->
@@ -204,9 +236,9 @@ fun FullPlayerSheet(
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = SliderDefaults.colors(
-                    thumbColor = SaffronPrimary,
+                    thumbColor = SaffronGold,
                     activeTrackColor = SaffronPrimary,
-                    inactiveTrackColor = BorderDark
+                    inactiveTrackColor = SurfaceHighlight
                 )
             )
 
@@ -218,7 +250,7 @@ fun FullPlayerSheet(
                 Text(
                     text = formatDuration(currentPos),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = TextMuted
+                    color = TextSecondary
                 )
                 Text(
                     text = formatDuration(duration),
@@ -229,7 +261,7 @@ fun FullPlayerSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Main Playback Controls
+            // Main Playback Controls with Glowing Amber Dial
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
@@ -261,13 +293,13 @@ fun FullPlayerSheet(
                     )
                 }
 
-                // Play / Pause Large Button
+                // Play / Pause Large Glowing Dial
                 IconButton(
                     onClick = onPlayPause,
                     modifier = Modifier
-                        .size(68.dp)
+                        .size(72.dp)
                         .clip(CircleShape)
-                        .background(SaffronPrimary)
+                        .background(Brush.radialGradient(listOf(SaffronGold, SaffronPrimary, SaffronDark)))
                 ) {
                     if (playerState.isBuffering) {
                         CircularProgressIndicator(
@@ -280,7 +312,7 @@ fun FullPlayerSheet(
                             imageVector = if (playerState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                             contentDescription = if (playerState.isPlaying) "Pause" else "Play",
                             tint = BackgroundDark,
-                            modifier = Modifier.size(38.dp)
+                            modifier = Modifier.size(40.dp)
                         )
                     }
                 }
@@ -361,15 +393,15 @@ fun FullPlayerSheet(
                         )
                     },
                     colors = AssistChipDefaults.assistChipColors(
-                        containerColor = if (playerState.sleepTimerSecondsRemaining > 0) SaffronPrimary.copy(alpha = 0.2f) else SurfaceCard,
-                        labelColor = if (playerState.sleepTimerSecondsRemaining > 0) SaffronGold else TextPrimary,
-                        leadingIconContentColor = if (playerState.sleepTimerSecondsRemaining > 0) SaffronGold else TextSecondary
+                        containerColor = SurfaceCard,
+                        labelColor = TextPrimary,
+                        leadingIconContentColor = SaffronPrimary
                     ),
                     border = BorderStroke(1.dp, BorderDark)
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 
@@ -378,10 +410,11 @@ fun FullPlayerSheet(
         AlertDialog(
             onDismissRequest = { showSpeedDialog = false },
             title = { Text("Playback Speed", color = TextPrimary) },
-            containerColor = SurfaceDark,
+            containerColor = SurfaceCard,
             text = {
                 Column {
-                    listOf(0.75f, 1.0f, 1.25f, 1.5f, 1.75f, 2.0f).forEach { speed ->
+                    val speeds = listOf(0.75f, 1.0f, 1.25f, 1.5f, 1.75f, 2.0f)
+                    speeds.forEach { speed ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -390,22 +423,22 @@ fun FullPlayerSheet(
                                     showSpeedDialog = false
                                 }
                                 .padding(vertical = 12.dp, horizontal = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
+                            RadioButton(
+                                selected = playerState.playbackSpeed == speed,
+                                onClick = null,
+                                colors = RadioButtonDefaults.colors(
+                                    selectedColor = SaffronPrimary,
+                                    unselectedColor = TextSecondary
+                                )
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
                             Text(
                                 text = "${speed}x",
                                 color = if (playerState.playbackSpeed == speed) SaffronGold else TextPrimary,
                                 fontWeight = if (playerState.playbackSpeed == speed) FontWeight.Bold else FontWeight.Normal
                             )
-                            if (playerState.playbackSpeed == speed) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = "Selected",
-                                    tint = SaffronGold,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
                         }
                     }
                 }
@@ -418,52 +451,45 @@ fun FullPlayerSheet(
         )
     }
 
-    // Sleep Timer Selection Dialog
+    // Sleep Timer Dialog
     if (showSleepTimerDialog) {
         AlertDialog(
             onDismissRequest = { showSleepTimerDialog = false },
             title = { Text("Sleep Timer", color = TextPrimary) },
-            containerColor = SurfaceDark,
+            containerColor = SurfaceCard,
             text = {
                 Column {
-                    listOf(
-                        0 to "Off",
-                        15 to "15 Minutes",
-                        30 to "30 Minutes",
-                        45 to "45 Minutes",
-                        60 to "60 Minutes"
-                    ).forEach { (mins, title) ->
+                    val options = listOf(
+                        "Off" to 0,
+                        "15 minutes" to 15,
+                        "30 minutes" to 30,
+                        "45 minutes" to 45,
+                        "60 minutes" to 60,
+                        "End of Sermon" to -1
+                    )
+                    options.forEach { (label, minutes) ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    onSleepTimerSet(mins)
+                                    onSleepTimerSet(minutes)
                                     showSleepTimerDialog = false
                                 }
                                 .padding(vertical = 12.dp, horizontal = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = title,
-                                color = if (playerState.sleepTimerMinutesLeft == mins) SaffronGold else TextPrimary,
-                                fontWeight = if (playerState.sleepTimerMinutesLeft == mins) FontWeight.Bold else FontWeight.Normal
+                                text = label,
+                                color = TextPrimary,
+                                modifier = Modifier.weight(1f)
                             )
-                            if (playerState.sleepTimerMinutesLeft == mins) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = "Selected",
-                                    tint = SaffronGold,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
                         }
                     }
                 }
             },
             confirmButton = {
                 TextButton(onClick = { showSleepTimerDialog = false }) {
-                    Text("Close", color = SaffronPrimary)
+                    Text("Cancel", color = SaffronPrimary)
                 }
             }
         )
@@ -472,12 +498,12 @@ fun FullPlayerSheet(
 
 private fun formatDuration(millis: Long): String {
     val totalSeconds = (millis / 1000).coerceAtLeast(0)
-    val hours = totalSeconds / 3600
-    val minutes = (totalSeconds % 3600) / 60
+    val minutes = totalSeconds / 60
     val seconds = totalSeconds % 60
-
+    val hours = minutes / 60
     return if (hours > 0) {
-        String.format(Locale.getDefault(), "%d:%02d:%02d", hours, minutes, seconds)
+        val remainingMinutes = minutes % 60
+        String.format(Locale.getDefault(), "%d:%02d:%02d", hours, remainingMinutes, seconds)
     } else {
         String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
     }
