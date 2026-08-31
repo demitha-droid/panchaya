@@ -101,7 +101,7 @@ fun JethavanaramaScreen(
                                 text = "ජෙතවනාරාමය",
                                 style = MaterialTheme.typography.headlineMedium.copy(
                                     fontWeight = FontWeight.Bold,
-                                    color = SaffronGold
+                                    color = TextPrimary
                                 )
                             )
                             Text(

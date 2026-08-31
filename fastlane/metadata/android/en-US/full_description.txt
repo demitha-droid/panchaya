@@ -1,0 +1,11 @@
+Panchaya (පංචාය) is a modern, free, and open-source Android application for streaming and downloading authentic Buddhist Dhamma Sermons.
+
+Features:
+- Stream high-quality audio sermons from Jethavanarama Buddhist Monastery and Pahura Dhamma Sermons.
+- Sacred Obsidian & Liquid Amber dark theme optimized for OLED battery efficiency and nightly listening.
+- Live audio frequency equalizer waveforms synced with playback.
+- Offline MP3 download manager for listening in retreat or without internet connectivity.
+- Background playback and full MediaSession lockscreen notifications.
+- Monastery news reader directly from jethavanarama.org.
+- Dhamma shorts video player.
+- 100% Free, Open Source, and Ad-Free.

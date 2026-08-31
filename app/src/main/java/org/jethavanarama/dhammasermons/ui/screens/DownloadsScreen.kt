@@ -97,7 +97,7 @@ fun DownloadsScreen(
                         text = "බාගත කිරීම් (Downloads)",
                         style = MaterialTheme.typography.headlineMedium.copy(
                             fontWeight = FontWeight.Bold,
-                            color = SaffronGold
+                            color = TextPrimary
                         )
                     )
                     Text(

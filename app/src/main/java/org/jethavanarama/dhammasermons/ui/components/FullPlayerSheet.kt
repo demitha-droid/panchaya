@@ -57,16 +57,7 @@ fun FullPlayerSheet(
     val currentPos = if (isUserSeeking) seekPositionMs else playerState.currentPositionMs
     val duration = playerState.durationMs
 
-    val artworkBorder = BorderStroke(
-        width = 1.5.dp,
-        brush = Brush.linearGradient(
-            listOf(
-                SaffronPrimary.copy(alpha = 0.7f),
-                SaffronGold.copy(alpha = 0.9f),
-                SaffronDark.copy(alpha = 0.4f)
-            )
-        )
-    )
+    val artworkBorder = BorderStroke(1.2.dp, BorderDark)
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -79,7 +70,7 @@ fun FullPlayerSheet(
                     .width(44.dp)
                     .height(4.dp),
                 shape = CircleShape,
-                color = SaffronPrimary.copy(alpha = 0.4f)
+                color = BorderDark
             ) {}
         }
     ) {
@@ -106,13 +97,13 @@ fun FullPlayerSheet(
                 }
 
                 Surface(
-                    color = if (sermon.source == SermonSource.PAHURA_YOUTUBE) AccentPahuraRed.copy(alpha = 0.15f) else SaffronPrimary.copy(alpha = 0.15f),
+                    color = if (sermon.source == SermonSource.PAHURA_YOUTUBE) AccentPahuraRed.copy(alpha = 0.12f) else SaffronPrimary.copy(alpha = 0.12f),
                     shape = RoundedCornerShape(8.dp),
                     border = BorderStroke(0.8.dp, if (sermon.source == SermonSource.PAHURA_YOUTUBE) AccentPahuraRed.copy(alpha = 0.3f) else SaffronPrimary.copy(alpha = 0.3f))
                 ) {
                     Text(
                         text = if (sermon.source == SermonSource.PAHURA_YOUTUBE) "පහුර YOUTUBE" else "ජෙතවනාරාමය",
-                        color = if (sermon.source == SermonSource.PAHURA_YOUTUBE) AccentPahuraRed else SaffronGold,
+                        color = if (sermon.source == SermonSource.PAHURA_YOUTUBE) AccentPahuraRed else SaffronPrimary,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
@@ -149,7 +140,7 @@ fun FullPlayerSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Large Artwork with Golden Halo Border
+            // Large Artwork with Delicate Sandstone Border
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -158,7 +149,7 @@ fun FullPlayerSheet(
                 shape = RoundedCornerShape(24.dp),
                 border = artworkBorder,
                 color = SurfaceCard,
-                shadowElevation = 16.dp
+                shadowElevation = 8.dp
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -202,7 +193,7 @@ fun FullPlayerSheet(
             Text(
                 text = sermon.thero,
                 style = MaterialTheme.typography.bodyLarge.copy(
-                    color = SaffronGold,
+                    color = SaffronPrimary,
                     fontWeight = FontWeight.Medium
                 ),
                 textAlign = TextAlign.Center
@@ -223,7 +214,7 @@ fun FullPlayerSheet(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Seek Slider with Liquid Amber Colors
+            // Seek Slider with Terracotta Colors
             Slider(
                 value = if (duration > 0) currentPos.toFloat() / duration.toFloat() else 0f,
                 onValueChange = { frac ->
@@ -236,9 +227,9 @@ fun FullPlayerSheet(
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = SliderDefaults.colors(
-                    thumbColor = SaffronGold,
+                    thumbColor = SaffronPrimary,
                     activeTrackColor = SaffronPrimary,
-                    inactiveTrackColor = SurfaceHighlight
+                    inactiveTrackColor = SurfaceDark
                 )
             )
 
@@ -261,7 +252,7 @@ fun FullPlayerSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Main Playback Controls with Glowing Amber Dial
+            // Main Playback Controls with Terracotta Dial
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
@@ -293,7 +284,7 @@ fun FullPlayerSheet(
                     )
                 }
 
-                // Play / Pause Large Glowing Dial
+                // Play / Pause Large Terracotta Dial
                 IconButton(
                     onClick = onPlayPause,
                     modifier = Modifier
@@ -304,14 +295,14 @@ fun FullPlayerSheet(
                     if (playerState.isBuffering) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(32.dp),
-                            color = BackgroundDark,
+                            color = Color.White,
                             strokeWidth = 3.dp
                         )
                     } else {
                         Icon(
                             imageVector = if (playerState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                             contentDescription = if (playerState.isPlaying) "Pause" else "Play",
-                            tint = BackgroundDark,
+                            tint = Color.White,
                             modifier = Modifier.size(40.dp)
                         )
                     }
@@ -436,7 +427,7 @@ fun FullPlayerSheet(
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
                                 text = "${speed}x",
-                                color = if (playerState.playbackSpeed == speed) SaffronGold else TextPrimary,
+                                color = if (playerState.playbackSpeed == speed) SaffronPrimary else TextPrimary,
                                 fontWeight = if (playerState.playbackSpeed == speed) FontWeight.Bold else FontWeight.Normal
                             )
                         }

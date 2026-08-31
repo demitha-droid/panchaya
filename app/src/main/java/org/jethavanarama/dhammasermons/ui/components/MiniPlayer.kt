@@ -74,15 +74,6 @@ fun MiniPlayer(
     // Calculate alpha based on drag distance
     val dragAlpha = (1f - (abs(offsetX.value) / maxDragPx)).coerceIn(0.2f, 1f)
 
-    val borderBrush = Brush.horizontalGradient(
-        listOf(
-            SaffronDark.copy(alpha = 0.4f),
-            SaffronPrimary.copy(alpha = 0.8f),
-            SaffronGold.copy(alpha = 0.9f),
-            SaffronPrimary.copy(alpha = 0.5f)
-        )
-    )
-
     AnimatedVisibility(
         visible = !isDismissed,
         exit = fadeOut(tween(180)) + slideOutHorizontally(targetOffsetX = { if (offsetX.value >= 0) it else -it }),
@@ -120,21 +111,20 @@ fun MiniPlayer(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(18.dp))
+                    .clip(RoundedCornerShape(20.dp))
                     .clickable(onClick = onClick),
                 color = SurfaceCard,
-                border = BorderStroke(1.2.dp, borderBrush),
-                tonalElevation = 8.dp,
-                shadowElevation = 14.dp,
-                shape = RoundedCornerShape(18.dp)
+                border = BorderStroke(1.dp, BorderDark),
+                shadowElevation = 8.dp,
+                shape = RoundedCornerShape(20.dp)
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    // Liquid Amber progress bar
+                    // Terracotta ochre progress line
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(3.dp)
-                            .background(SurfaceHighlight)
+                            .background(SurfaceDark)
                     ) {
                         Box(
                             modifier = Modifier
@@ -142,7 +132,7 @@ fun MiniPlayer(
                                 .fillMaxHeight()
                                 .background(
                                     Brush.horizontalGradient(
-                                        listOf(SaffronDark, SaffronPrimary, SaffronGold)
+                                        listOf(SaffronPrimary, SaffronGold)
                                     )
                                 )
                         )
@@ -179,7 +169,7 @@ fun MiniPlayer(
                                 ) {
                                     LiveWaveformVisualizer(
                                         isPlaying = true,
-                                        barColor = SaffronGold,
+                                        barColor = Color.White,
                                         barCount = 3,
                                         barWidth = 2.dp,
                                         maxHeight = 12.dp,
@@ -199,8 +189,8 @@ fun MiniPlayer(
                                 text = sermon.title,
                                 style = MaterialTheme.typography.titleMedium.copy(
                                     fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = SaffronGold
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextPrimary
                                 ),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
@@ -229,7 +219,7 @@ fun MiniPlayer(
 
                         Spacer(modifier = Modifier.width(4.dp))
 
-                        // Play / Pause glowing dial
+                        // Play / Pause Terracotta Dial
                         IconButton(
                             onClick = onPlayPauseClick,
                             modifier = Modifier
@@ -240,14 +230,14 @@ fun MiniPlayer(
                             if (playerState.isBuffering) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(20.dp),
-                                    color = BackgroundDark,
+                                    color = Color.White,
                                     strokeWidth = 2.5.dp
                                 )
                             } else {
                                 Icon(
                                     imageVector = if (playerState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                                     contentDescription = if (playerState.isPlaying) "Pause" else "Play",
-                                    tint = BackgroundDark,
+                                    tint = Color.White,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }

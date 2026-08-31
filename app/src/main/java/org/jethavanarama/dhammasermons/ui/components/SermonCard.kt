@@ -46,17 +46,17 @@ fun SermonCard(
 ) {
     val cardBorder = if (isCurrent) {
         BorderStroke(
-            width = 1.2.dp,
+            width = 1.5.dp,
             brush = Brush.linearGradient(
                 listOf(
                     SaffronPrimary,
-                    SaffronGold.copy(alpha = 0.8f),
-                    SaffronDark.copy(alpha = 0.4f)
+                    SaffronGold,
+                    SaffronDark
                 )
             )
         )
     } else {
-        BorderStroke(width = 1.dp, color = BorderSubtle)
+        BorderStroke(width = 1.dp, color = BorderDark)
     }
 
     Card(
@@ -67,6 +67,7 @@ fun SermonCard(
         colors = CardDefaults.cardColors(
             containerColor = if (isCurrent) SurfaceHighlight else SurfaceCard
         ),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isCurrent) 3.dp else 1.dp),
         shape = RoundedCornerShape(18.dp),
         border = cardBorder
     ) {
@@ -106,7 +107,7 @@ fun SermonCard(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.55f)),
+                            .background(Color.Black.copy(alpha = 0.45f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Box(
@@ -119,7 +120,7 @@ fun SermonCard(
                             Icon(
                                 imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                                 contentDescription = "Playback",
-                                tint = BackgroundDark,
+                                tint = Color.White,
                                 modifier = Modifier.size(22.dp)
                             )
                         }
@@ -129,7 +130,7 @@ fun SermonCard(
                 // Duration badge on thumbnail (bottom-end)
                 if (sermon.durationFormatted != null && !isCurrent) {
                     Surface(
-                        color = Color.Black.copy(alpha = 0.85f),
+                        color = TextPrimary.copy(alpha = 0.82f),
                         shape = RoundedCornerShape(6.dp),
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
@@ -137,7 +138,7 @@ fun SermonCard(
                     ) {
                         Text(
                             text = sermon.durationFormatted!!,
-                            color = SaffronLight,
+                            color = BackgroundDark,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
@@ -158,13 +159,13 @@ fun SermonCard(
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Surface(
-                        color = if (sermon.source == SermonSource.PAHURA_YOUTUBE) AccentPahuraRed.copy(alpha = 0.15f) else SaffronPrimary.copy(alpha = 0.15f),
+                        color = if (sermon.source == SermonSource.PAHURA_YOUTUBE) AccentPahuraRed.copy(alpha = 0.12f) else SaffronPrimary.copy(alpha = 0.12f),
                         shape = RoundedCornerShape(6.dp),
                         border = BorderStroke(0.8.dp, if (sermon.source == SermonSource.PAHURA_YOUTUBE) AccentPahuraRed.copy(alpha = 0.3f) else SaffronPrimary.copy(alpha = 0.3f))
                     ) {
                         Text(
                             text = if (sermon.source == SermonSource.PAHURA_YOUTUBE) "පහුර" else "ජෙතවනාරාමය",
-                            color = if (sermon.source == SermonSource.PAHURA_YOUTUBE) AccentPahuraRed else SaffronGold,
+                            color = if (sermon.source == SermonSource.PAHURA_YOUTUBE) AccentPahuraRed else SaffronPrimary,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -174,7 +175,7 @@ fun SermonCard(
                     if (isCurrent && isPlaying) {
                         LiveWaveformVisualizer(
                             isPlaying = true,
-                            barColor = SaffronGold,
+                            barColor = SaffronPrimary,
                             barCount = 4,
                             barWidth = 2.dp,
                             maxHeight = 12.dp,
@@ -184,11 +185,11 @@ fun SermonCard(
                         Surface(
                             color = SurfaceDark,
                             shape = RoundedCornerShape(6.dp),
-                            border = BorderStroke(0.5.dp, BorderSubtle)
+                            border = BorderStroke(0.5.dp, BorderDark)
                         ) {
                             Text(
                                 text = sermon.durationFormatted!!,
-                                color = SaffronLight,
+                                color = TextSecondary,
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
@@ -213,7 +214,7 @@ fun SermonCard(
                 Text(
                     text = sermon.title,
                     style = MaterialTheme.typography.titleMedium.copy(
-                        color = if (isCurrent) SaffronGold else TextPrimary,
+                        color = if (isCurrent) SaffronPrimary else TextPrimary,
                         fontWeight = FontWeight.SemiBold
                     ),
                     maxLines = 2,
