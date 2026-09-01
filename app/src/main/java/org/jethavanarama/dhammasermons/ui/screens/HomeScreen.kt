@@ -255,12 +255,6 @@ fun HomeScreen(
                                         maxLines = 2,
                                         overflow = TextOverflow.Ellipsis
                                     )
-                                    Spacer(modifier = Modifier.height(2.dp))
-                                    Text(
-                                        text = featuredSermon.thero,
-                                        style = MaterialTheme.typography.bodyMedium.copy(color = SaffronGold),
-                                        maxLines = 1
-                                    )
                                 }
                             }
                         }
