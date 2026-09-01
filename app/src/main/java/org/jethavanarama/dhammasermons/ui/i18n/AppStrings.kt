@@ -1,4 +1,4 @@
-﻿package org.jethavanarama.dhammasermons.ui.i18n
+package org.jethavanarama.dhammasermons.ui.i18n
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
@@ -91,12 +91,12 @@ data class AppStrings(
 )
 
 val SinhalaStrings = AppStrings(
-    tabHome = "මුල් පිටුව",
+    tabHome = "මුල්\nපිටුව",
     tabJethavanarama = "ප්‍රධාන",
     tabPahura = "පහුර",
     tabDhammapada = "ධම්මපදය",
-    tabShorts = "කෙටි වීඩියෝ",
-    tabDownloads = "බාගත කිරීම්",
+    tabShorts = "කෙටි\nවීඩියෝ",
+    tabDownloads = "බාගත\nකිරීම්",
 
     homeTitle = "ධර්ම දේශනා",
     homeSubtitle = "ජෙතවනාරාම සහ පහුර දේශනා",

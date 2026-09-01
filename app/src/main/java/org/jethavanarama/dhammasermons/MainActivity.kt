@@ -209,10 +209,11 @@ fun MainAppScaffold(viewModel: MainViewModel) {
                         label = {
                             Text(
                                 text = tabTitle,
-                                fontSize = 9.5.sp,
-                                maxLines = 1,
-                                softWrap = false,
-                                overflow = androidx.compose.ui.text.style.TextOverflow.Visible,
+                                fontSize = 11.sp,
+                                lineHeight = 13.sp,
+                                maxLines = 2,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                                 fontWeight = if (isSelected) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal
                             )
                         },
