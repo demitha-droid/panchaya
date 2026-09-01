@@ -360,6 +360,15 @@ private fun ShortGridCard(
                     overflow = TextOverflow.Ellipsis
                 )
 
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = sermon.thero,
+                    style = MaterialTheme.typography.labelSmall.copy(color = SaffronGold),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // Action Buttons Row (Audio-Only & Download)
@@ -563,6 +572,11 @@ private fun ShortsVideoDialog(
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = sermon.thero,
+                            color = SaffronGold,
+                            style = MaterialTheme.typography.bodySmall
                         )
                     }
 
