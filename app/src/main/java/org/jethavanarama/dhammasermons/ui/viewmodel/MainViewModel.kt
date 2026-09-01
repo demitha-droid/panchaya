@@ -20,6 +20,9 @@ import org.jethavanarama.dhammasermons.data.model.PaginatedSermons
 import org.jethavanarama.dhammasermons.data.model.Sermon
 import org.jethavanarama.dhammasermons.data.model.SermonCategory
 import org.jethavanarama.dhammasermons.data.model.Thero
+import org.jethavanarama.dhammasermons.data.model.DhammapadaKatha
+import org.jethavanarama.dhammasermons.data.model.DhammapadaVagga
+import org.jethavanarama.dhammasermons.data.repository.DhammapadaRepository
 import org.jethavanarama.dhammasermons.player.AudioPlayerManager
 import org.jethavanarama.dhammasermons.player.PlayerUiState
 import org.jethavanarama.dhammasermons.ui.i18n.AppLanguage
@@ -69,7 +72,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val jethavanaramaExtractor = JethavanaramaExtractor()
     private val pahuraExtractor = PahuraYouTubeExtractor()
-    val newsExtractor = org.jethavanarama.dhammasermons.data.extractor.JethavanaramaNewsExtractor()
 
     // Player state
     val playerState: StateFlow<PlayerUiState> = playerManager.uiState
@@ -92,10 +94,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _shortsPaginated = MutableStateFlow(PaginatedSermons(emptyList()))
     val shortsPaginated: StateFlow<PaginatedSermons> = _shortsPaginated.asStateFlow()
 
-    // Jethavanarama News State
-    private val _newsItems = MutableStateFlow<List<org.jethavanarama.dhammasermons.data.model.NewsItem>>(emptyList())
-    val newsItems: StateFlow<List<org.jethavanarama.dhammasermons.data.model.NewsItem>> = _newsItems.asStateFlow()
-
     private val _isHomeLoading = MutableStateFlow(false)
     val isHomeLoading: StateFlow<Boolean> = _isHomeLoading.asStateFlow()
 
@@ -107,9 +105,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _isShortsLoading = MutableStateFlow(false)
     val isShortsLoading: StateFlow<Boolean> = _isShortsLoading.asStateFlow()
-
-    private val _isNewsLoading = MutableStateFlow(false)
-    val isNewsLoading: StateFlow<Boolean> = _isNewsLoading.asStateFlow()
 
     // Filters for Jethavanarama
     val categories: List<SermonCategory> = jethavanaramaExtractor.defaultCategories
@@ -132,9 +127,51 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _storageUsedBytes = MutableStateFlow(0L)
     val storageUsedBytes: StateFlow<Long> = _storageUsedBytes.asStateFlow()
 
+    // Dhammapada State
+    val dhammapadaRepo = DhammapadaRepository(application)
+    private val _dhammapadaVaggas = MutableStateFlow<List<DhammapadaVagga>>(emptyList())
+    val dhammapadaVaggas: StateFlow<List<DhammapadaVagga>> = _dhammapadaVaggas.asStateFlow()
+
+    private val _selectedDhammapadaVagga = MutableStateFlow<DhammapadaVagga?>(null)
+    val selectedDhammapadaVagga: StateFlow<DhammapadaVagga?> = _selectedDhammapadaVagga.asStateFlow()
+
+    private val _dhammapadaSearchQuery = MutableStateFlow("")
+    val dhammapadaSearchQuery: StateFlow<String> = _dhammapadaSearchQuery.asStateFlow()
+
+    private val _dhammapadaSearchResults = MutableStateFlow<List<DhammapadaKatha>>(emptyList())
+    val dhammapadaSearchResults: StateFlow<List<DhammapadaKatha>> = _dhammapadaSearchResults.asStateFlow()
+
+    private val _isDhammapadaLoading = MutableStateFlow(false)
+    val isDhammapadaLoading: StateFlow<Boolean> = _isDhammapadaLoading.asStateFlow()
+
+    fun selectDhammapadaVagga(vagga: DhammapadaVagga?) {
+        _selectedDhammapadaVagga.value = vagga
+    }
+
+    fun setDhammapadaSearchQuery(query: String) {
+        _dhammapadaSearchQuery.value = query
+        if (query.isBlank()) {
+            _dhammapadaSearchResults.value = emptyList()
+        } else {
+            viewModelScope.launch {
+                _dhammapadaSearchResults.value = dhammapadaRepo.search(query)
+            }
+        }
+    }
+
+    fun loadDhammapada() {
+        viewModelScope.launch {
+            _isDhammapadaLoading.value = true
+            val list = dhammapadaRepo.getVaggas()
+            _dhammapadaVaggas.value = list
+            _isDhammapadaLoading.value = false
+        }
+    }
+
     init {
         playerManager.ensureServiceStarted()
         refreshAllFeeds(forceNetworkRefresh = false)
+        loadDhammapada()
         updateStorageUsage()
     }
 
@@ -146,7 +183,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         loadJethavanaramaSermons(page = _jethavanaramaPaginated.value.currentPage.coerceAtLeast(1))
         loadPahuraSermons(page = _pahuraPaginated.value.currentPage.coerceAtLeast(1), forceRefresh = forceNetworkRefresh)
         loadPahuraShorts(page = _shortsPaginated.value.currentPage.coerceAtLeast(1), forceRefresh = forceNetworkRefresh)
-        loadNewsFeed(forceRefresh = forceNetworkRefresh)
     }
 
     fun loadHomeFeed() {
@@ -322,20 +358,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 e.printStackTrace()
             } finally {
                 _isShortsLoading.value = false
-            }
-        }
-    }
-
-    fun loadNewsFeed(forceRefresh: Boolean = false) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _isNewsLoading.value = true
-            try {
-                val news = newsExtractor.fetchNews(forceRefresh = forceRefresh)
-                _newsItems.value = news
-            } catch (e: Exception) {
-                e.printStackTrace()
-            } finally {
-                _isNewsLoading.value = false
             }
         }
     }

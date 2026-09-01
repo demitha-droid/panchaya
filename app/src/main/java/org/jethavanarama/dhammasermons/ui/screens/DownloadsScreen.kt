@@ -376,12 +376,6 @@ private fun ActiveDownloadCard(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Text(
-                        text = item.sermon.thero,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = SaffronGold,
-                        maxLines = 1
-                    )
                 }
 
                 Spacer(modifier = Modifier.width(8.dp))
@@ -540,23 +534,6 @@ private fun DownloadedSermonRow(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(modifier = Modifier.height(2.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.CheckCircle,
-                        contentDescription = "Offline",
-                        tint = AccentOfflineGreen,
-                        modifier = Modifier.size(12.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = sermon.thero,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = TextSecondary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
             }
 
             Spacer(modifier = Modifier.width(8.dp))

@@ -1,4 +1,4 @@
-package org.jethavanarama.dhammasermons.ui.i18n
+﻿package org.jethavanarama.dhammasermons.ui.i18n
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
@@ -9,8 +9,8 @@ data class AppStrings(
     val tabHome: String,
     val tabJethavanarama: String,
     val tabPahura: String,
+    val tabDhammapada: String,
     val tabShorts: String,
-    val tabNews: String,
     val tabDownloads: String,
 
     // Home Screen
@@ -21,6 +21,18 @@ data class AppStrings(
     val recentSermons: String,
     val seeAll: String,
     val noSermonsFound: String,
+
+    // Dhammapada
+    val dhammapadaTitle: String,
+    val dhammapadaSubtitle: String,
+    val allVaggas: String,
+    val gathaCountLabel: String,
+    val kathaCountLabel: String,
+    val readFullStory: String,
+    val collapseStory: String,
+    val paliGatha: String,
+    val sinhalaMeaning: String,
+    val searchDhammapada: String,
 
     // Jethavanarama & Pahura
     val jethavanaramaTitle: String,
@@ -35,13 +47,8 @@ data class AppStrings(
     val nextPage: String,
     val retry: String,
 
-    // Shorts & News
+    // Shorts
     val shortsTitle: String,
-    val newsTitle: String,
-    val newsSubtitle: String,
-    val readArticle: String,
-    val share: String,
-    val noNews: String,
 
     // Downloads
     val downloadsTitle: String,
@@ -87,8 +94,8 @@ val SinhalaStrings = AppStrings(
     tabHome = "මුල් පිටුව",
     tabJethavanarama = "ප්‍රධාන",
     tabPahura = "පහුර",
+    tabDhammapada = "ධම්මපදය",
     tabShorts = "කෙටි වීඩියෝ",
-    tabNews = "පුවත්",
     tabDownloads = "බාගත කිරීම්",
 
     homeTitle = "ධර්ම දේශනා",
@@ -98,6 +105,17 @@ val SinhalaStrings = AppStrings(
     recentSermons = "නවතම දේශනා",
     seeAll = "සියල්ල බලන්න",
     noSermonsFound = "දේශනා හමු නොවීය",
+
+    dhammapadaTitle = "ධම්මපදය",
+    dhammapadaSubtitle = "ගාථා 423 සහ සද්ධර්ම සාගර කථා වස්තු",
+    allVaggas = "සියලු වර්ග (26)",
+    gathaCountLabel = "ගාථා",
+    kathaCountLabel = "කථා",
+    readFullStory = "සම්පූර්ණ කතාව කියවන්න",
+    collapseStory = "කතාව හකුලන්න",
+    paliGatha = "පාලි ගාථාව",
+    sinhalaMeaning = "සිංහල තේරුම",
+    searchDhammapada = "ගාථා හෝ කතා වස්තු සොයන්න...",
 
     jethavanaramaTitle = "ජෙතවනාරාමය",
     jethavanaramaSubtitle = "ජෙතවනාරාම බෞද්ධ විහාර සංකීර්ණය",
@@ -112,11 +130,6 @@ val SinhalaStrings = AppStrings(
     retry = "නැවත උත්සාහ කරන්න",
 
     shortsTitle = "ධර්ම කෙටි වීඩියෝ (Shorts)",
-    newsTitle = "ආරාම පුවත් (News)",
-    newsSubtitle = "ජෙතවනාරාම විහාරයේ නවතම පුවත් සහ ලිපි",
-    readArticle = "ලිපිය කියවන්න",
-    share = "බෙදාගන්න",
-    noNews = "පුවත් හමු නොවීය",
 
     downloadsTitle = "බාගත කිරීම් (Downloads)",
     downloadsSubtitle = "නොබැඳි දේශනා සහ මතක කළමනාකරණය",
@@ -159,8 +172,8 @@ val EnglishStrings = AppStrings(
     tabHome = "Home",
     tabJethavanarama = "Main",
     tabPahura = "Pahura",
+    tabDhammapada = "Dhammapada",
     tabShorts = "Shorts",
-    tabNews = "News",
     tabDownloads = "Downloads",
 
     homeTitle = "Dhamma Sermons",
@@ -170,6 +183,17 @@ val EnglishStrings = AppStrings(
     recentSermons = "Recent Sermons",
     seeAll = "See All",
     noSermonsFound = "No sermons found",
+
+    dhammapadaTitle = "Dhammapada",
+    dhammapadaSubtitle = "423 Verses & Complete Buddhist Stories",
+    allVaggas = "All Chapters (26 Vaggas)",
+    gathaCountLabel = "Verses",
+    kathaCountLabel = "Stories",
+    readFullStory = "Read Full Background Story",
+    collapseStory = "Collapse Story",
+    paliGatha = "Pali Verse",
+    sinhalaMeaning = "Sinhala Translation",
+    searchDhammapada = "Search verses or stories...",
 
     jethavanaramaTitle = "Jethavanarama",
     jethavanaramaSubtitle = "Jethavanarama Buddhist Monastery",
@@ -184,11 +208,6 @@ val EnglishStrings = AppStrings(
     retry = "Retry",
 
     shortsTitle = "Dhamma Shorts",
-    newsTitle = "Monastery News",
-    newsSubtitle = "Latest news and articles from Jethavanarama",
-    readArticle = "Read Article",
-    share = "Share",
-    noNews = "No news available",
 
     downloadsTitle = "Downloads",
     downloadsSubtitle = "Offline Sermons & Storage Manager",
@@ -231,8 +250,8 @@ val GermanStrings = AppStrings(
     tabHome = "Startseite",
     tabJethavanarama = "Haupt",
     tabPahura = "Pahura",
+    tabDhammapada = "Dhammapada",
     tabShorts = "Kurzvideos",
-    tabNews = "Nachrichten",
     tabDownloads = "Downloads",
 
     homeTitle = "Dhamma-Predigten",
@@ -242,6 +261,17 @@ val GermanStrings = AppStrings(
     recentSermons = "Neueste Predigten",
     seeAll = "Alle anzeigen",
     noSermonsFound = "Keine Predigten gefunden",
+
+    dhammapadaTitle = "Dhammapada",
+    dhammapadaSubtitle = "423 Verse & Vollständige Buddhistische Geschichten",
+    allVaggas = "Alle 26 Kapitel (Vaggas)",
+    gathaCountLabel = "Verse",
+    kathaCountLabel = "Geschichten",
+    readFullStory = "Vollständige Geschichte lesen",
+    collapseStory = "Geschichte einklappen",
+    paliGatha = "Pali Vers",
+    sinhalaMeaning = "Singhalesische Erklärung",
+    searchDhammapada = "Verse oder Geschichten suchen...",
 
     jethavanaramaTitle = "Jethavanarama",
     jethavanaramaSubtitle = "Buddhistisches Kloster Jethavanarama",
@@ -256,11 +286,6 @@ val GermanStrings = AppStrings(
     retry = "Wiederholen",
 
     shortsTitle = "Dhamma Kurzvideos",
-    newsTitle = "Kloster-Nachrichten",
-    newsSubtitle = "Aktuelle Nachrichten und Berichte aus Jethavanarama",
-    readArticle = "Artikel lesen",
-    share = "Teilen",
-    noNews = "Keine Nachrichten verfügbar",
 
     downloadsTitle = "Downloads",
     downloadsSubtitle = "Offline-Predigten & Speicherverwaltung",
@@ -303,8 +328,8 @@ val HindiStrings = AppStrings(
     tabHome = "होम",
     tabJethavanarama = "मुख्य",
     tabPahura = "पहुरा",
+    tabDhammapada = "धम्मपद",
     tabShorts = "शॉर्ट्स",
-    tabNews = "समाचार",
     tabDownloads = "डाउनलोड",
 
     homeTitle = "धम्म उपदेश",
@@ -314,6 +339,17 @@ val HindiStrings = AppStrings(
     recentSermons = "हाल के उपदेश",
     seeAll = "सभी देखें",
     noSermonsFound = "कोई उपदेश नहीं मिला",
+
+    dhammapadaTitle = "धम्मपद",
+    dhammapadaSubtitle = "423 गाथाएं एवं सम्पूर्ण कथाएं",
+    allVaggas = "सभी 26 वर्ग",
+    gathaCountLabel = "गाथाएं",
+    kathaCountLabel = "कथाएं",
+    readFullStory = "पूरी कथा पढ़ें",
+    collapseStory = "कथा समेटें",
+    paliGatha = "पाळि गाथा",
+    sinhalaMeaning = "सिंहल अर्थ",
+    searchDhammapada = "गाथा या कथा खोजें...",
 
     jethavanaramaTitle = "जेतवनाराम",
     jethavanaramaSubtitle = "जेतवनाराम बौद्ध मठ",
@@ -328,11 +364,6 @@ val HindiStrings = AppStrings(
     retry = "पुनः प्रयास करें",
 
     shortsTitle = "धम्म शॉर्ट्स",
-    newsTitle = "मठ समाचार",
-    newsSubtitle = "जेतवनाराम से नवीनतम समाचार और लेख",
-    readArticle = "लेख पढ़ें",
-    share = "साझा करें",
-    noNews = "कोई समाचार उपलब्ध नहीं",
 
     downloadsTitle = "डाउनलोड",
     downloadsSubtitle = "ऑफ़लाइन उपदेश और संग्रहण प्रबंधक",
@@ -375,8 +406,8 @@ val TamilStrings = AppStrings(
     tabHome = "முகப்பு",
     tabJethavanarama = "முதன்மை",
     tabPahura = "பஹுரா",
+    tabDhammapada = "தம்மபதம்",
     tabShorts = "குறும்படங்கள்",
-    tabNews = "செய்திகள்",
     tabDownloads = "பதிவிறக்கங்கள்",
 
     homeTitle = "தம்ம போதனைகள்",
@@ -386,6 +417,17 @@ val TamilStrings = AppStrings(
     recentSermons = "சமீபத்திய போதனைகள்",
     seeAll = "அனைத்தையும் பார்க்க",
     noSermonsFound = "போதனைகள் எதுவும் காணப்படவில்லை",
+
+    dhammapadaTitle = "தம்மபதம்",
+    dhammapadaSubtitle = "423 செய்யுள்கள் & பின்னணி கதைகள்",
+    allVaggas = "அனைத்து 26 அத்தியாயங்கள்",
+    gathaCountLabel = "செய்யுள்கள்",
+    kathaCountLabel = "கதைகள்",
+    readFullStory = "முழு கதையையும் படிக்கவும்",
+    collapseStory = "கதையை சுருக்கவும்",
+    paliGatha = "பாலி செய்யுள்",
+    sinhalaMeaning = "சிங்கள விளக்கம்",
+    searchDhammapada = "செய்யுள் அல்லது கதையைத் தேடுங்கள்...",
 
     jethavanaramaTitle = "ஜேதவனாராம",
     jethavanaramaSubtitle = "ஜேதவனாராம பௌத்த மடாலயம்",
@@ -400,11 +442,6 @@ val TamilStrings = AppStrings(
     retry = "மீண்டும் முயற்சிக்கவும்",
 
     shortsTitle = "தம்ம குறும்படங்கள் (Shorts)",
-    newsTitle = "மடாலய செய்திகள்",
-    newsSubtitle = "ஜேதவனாராமவின் சமீபத்திய செய்திகள் மற்றும் கட்டுரைகள்",
-    readArticle = "கட்டுரையைப் படிக்கவும்",
-    share = "பகிர்",
-    noNews = "செய்திகள் எதுவும் இல்லை",
 
     downloadsTitle = "பதிவிறக்கங்கள்",
     downloadsSubtitle = "ஆஃப்லைன் போதனைகள் & சேமிப்பக மேலாளர்",

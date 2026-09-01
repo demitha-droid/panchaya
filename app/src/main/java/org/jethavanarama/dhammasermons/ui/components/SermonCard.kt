@@ -130,18 +130,18 @@ fun SermonCard(
                 // Duration badge on thumbnail (bottom-end)
                 if (sermon.durationFormatted != null && !isCurrent) {
                     Surface(
-                        color = TextPrimary.copy(alpha = 0.82f),
-                        shape = RoundedCornerShape(6.dp),
+                        color = Color.Black.copy(alpha = 0.8f),
+                        shape = RoundedCornerShape(4.dp),
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .padding(4.dp)
                     ) {
                         Text(
                             text = sermon.durationFormatted!!,
-                            color = BackgroundDark,
+                            color = Color.White,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
                         )
                     }
                 }
@@ -181,20 +181,6 @@ fun SermonCard(
                             maxHeight = 12.dp,
                             minHeight = 4.dp
                         )
-                    } else if (sermon.durationFormatted != null) {
-                        Surface(
-                            color = SurfaceDark,
-                            shape = RoundedCornerShape(6.dp),
-                            border = BorderStroke(0.5.dp, BorderDark)
-                        ) {
-                            Text(
-                                text = sermon.durationFormatted!!,
-                                color = TextSecondary,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
-                            )
-                        }
                     }
 
                     if (!sermon.date.isNullOrBlank()) {
@@ -218,17 +204,6 @@ fun SermonCard(
                         fontWeight = FontWeight.SemiBold
                     ),
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Spacer(modifier = Modifier.height(2.dp))
-
-                // Thero Name
-                Text(
-                    text = sermon.thero,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TextSecondary,
-                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }

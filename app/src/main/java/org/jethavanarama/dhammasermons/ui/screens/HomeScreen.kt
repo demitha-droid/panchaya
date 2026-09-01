@@ -1,5 +1,6 @@
 package org.jethavanarama.dhammasermons.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,6 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
@@ -48,7 +50,8 @@ fun HomeScreen(
     onRefresh: () -> Unit,
     onOpenSettings: () -> Unit,
     onNavigateToJethavanarama: () -> Unit,
-    onNavigateToPahura: () -> Unit
+    onNavigateToPahura: () -> Unit,
+    onNavigateToDhammapada: () -> Unit = {}
 ) {
     val str = strings
     var searchQuery by remember { mutableStateOf("") }
@@ -255,11 +258,74 @@ fun HomeScreen(
                                         maxLines = 2,
                                         overflow = TextOverflow.Ellipsis
                                     )
-                                    Spacer(modifier = Modifier.height(2.dp))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Quick Category Banner: Dhammapada
+            if (searchQuery.isBlank()) {
+                item {
+                    Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(18.dp))
+                                .clickable { onNavigateToDhammapada() },
+                            shape = RoundedCornerShape(18.dp),
+                            colors = CardDefaults.cardColors(containerColor = SurfaceCard),
+                            border = BorderStroke(0.8.dp, SaffronPrimary.copy(alpha = 0.35f))
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(14.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(46.dp)
+                                        .clip(CircleShape)
+                                        .background(Brush.radialGradient(listOf(SaffronGold.copy(alpha = 0.25f), SaffronPrimary.copy(alpha = 0.12f)))),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.MenuBook,
+                                        contentDescription = null,
+                                        tint = SaffronPrimary,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.width(12.dp))
+
+                                Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = featuredSermon.thero,
-                                        style = MaterialTheme.typography.bodyMedium.copy(color = SaffronGold),
-                                        maxLines = 1
+                                        text = str.dhammapadaTitle,
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            color = TextPrimary
+                                        )
+                                    )
+                                    Text(
+                                        text = "වර්ග 26 • ගාථා 423 • අටුවා කථා වස්තු",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = TextSecondary
+                                    )
+                                }
+
+                                Surface(
+                                    color = SaffronPrimary.copy(alpha = 0.12f),
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Text(
+                                        text = "බලන්න",
+                                        color = SaffronPrimary,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                     )
                                 }
                             }

@@ -42,7 +42,8 @@ data class Sermon(
 
 enum class SermonSource {
     JETHAVANARAMA,
-    PAHURA_YOUTUBE
+    PAHURA_YOUTUBE,
+    DHAMMAPADA
 }
 
 enum class Language(val code: String, val displayName: String) {

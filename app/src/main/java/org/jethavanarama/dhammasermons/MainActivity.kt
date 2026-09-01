@@ -12,15 +12,15 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Article
-import androidx.compose.material.icons.automirrored.outlined.Article
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.PlayCircleFilled
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.Subscriptions
 import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.MenuBook
 import androidx.compose.material.icons.outlined.PlayCircleOutline
 import androidx.compose.material.icons.outlined.SelfImprovement
 import androidx.compose.material.icons.outlined.Subscriptions
@@ -42,10 +42,10 @@ import org.jethavanarama.dhammasermons.ui.i18n.AppStrings
 import org.jethavanarama.dhammasermons.ui.i18n.LocalAppStrings
 import org.jethavanarama.dhammasermons.ui.i18n.getStrings
 import org.jethavanarama.dhammasermons.ui.i18n.strings
+import org.jethavanarama.dhammasermons.ui.screens.DhammapadaScreen
 import org.jethavanarama.dhammasermons.ui.screens.DownloadsScreen
 import org.jethavanarama.dhammasermons.ui.screens.HomeScreen
 import org.jethavanarama.dhammasermons.ui.screens.JethavanaramaScreen
-import org.jethavanarama.dhammasermons.ui.screens.NewsScreen
 import org.jethavanarama.dhammasermons.ui.screens.PahuraScreen
 import org.jethavanarama.dhammasermons.ui.screens.ShortsScreen
 import org.jethavanarama.dhammasermons.ui.theme.*
@@ -59,7 +59,7 @@ enum class NavTab(
     JETHAVANARAMA(Icons.Filled.SelfImprovement, Icons.Outlined.SelfImprovement),
     PAHURA(Icons.Filled.Subscriptions, Icons.Outlined.Subscriptions),
     SHORTS(Icons.Filled.PlayCircleFilled, Icons.Outlined.PlayCircleOutline),
-    NEWS(Icons.AutoMirrored.Filled.Article, Icons.AutoMirrored.Outlined.Article),
+    DHAMMAPADA(Icons.Filled.MenuBook, Icons.Outlined.MenuBook),
     DOWNLOADS(Icons.Filled.CloudDownload, Icons.Outlined.CloudDownload);
 
     fun getTitle(str: AppStrings): String = when (this) {
@@ -67,7 +67,7 @@ enum class NavTab(
         JETHAVANARAMA -> str.tabJethavanarama
         PAHURA -> str.tabPahura
         SHORTS -> str.tabShorts
-        NEWS -> str.tabNews
+        DHAMMAPADA -> str.tabDhammapada
         DOWNLOADS -> str.tabDownloads
     }
 }
@@ -160,12 +160,16 @@ fun MainAppScaffold(viewModel: MainViewModel) {
     val isJethavanaramaLoading by viewModel.isJethavanaramaLoading.collectAsState()
     val isPahuraLoading by viewModel.isPahuraLoading.collectAsState()
     val isShortsLoading by viewModel.isShortsLoading.collectAsState()
-    val newsItems by viewModel.newsItems.collectAsState()
-    val isNewsLoading by viewModel.isNewsLoading.collectAsState()
 
     val selectedCategory by viewModel.selectedCategory.collectAsState()
     val selectedThero by viewModel.selectedThero.collectAsState()
     val selectedLanguage by viewModel.selectedLanguage.collectAsState()
+
+    val dhammapadaVaggas by viewModel.dhammapadaVaggas.collectAsState()
+    val selectedDhammapadaVagga by viewModel.selectedDhammapadaVagga.collectAsState()
+    val dhammapadaSearchQuery by viewModel.dhammapadaSearchQuery.collectAsState()
+    val dhammapadaSearchResults by viewModel.dhammapadaSearchResults.collectAsState()
+    val isDhammapadaLoading by viewModel.isDhammapadaLoading.collectAsState()
 
     val playerState by viewModel.playerState.collectAsState()
     val downloadStates by viewModel.downloadStates.collectAsState()
@@ -242,7 +246,21 @@ fun MainAppScaffold(viewModel: MainViewModel) {
                         onRefresh = { viewModel.loadHomeFeed() },
                         onOpenSettings = { showSettingsSheet = true },
                         onNavigateToJethavanarama = { selectedTab = NavTab.JETHAVANARAMA },
-                        onNavigateToPahura = { selectedTab = NavTab.PAHURA }
+                        onNavigateToPahura = { selectedTab = NavTab.PAHURA },
+                        onNavigateToDhammapada = { selectedTab = NavTab.DHAMMAPADA }
+                    )
+                }
+                NavTab.DHAMMAPADA -> {
+                    DhammapadaScreen(
+                        vaggas = dhammapadaVaggas,
+                        selectedVagga = selectedDhammapadaVagga,
+                        searchQuery = dhammapadaSearchQuery,
+                        searchResults = dhammapadaSearchResults,
+                        isLoading = isDhammapadaLoading,
+                        playerState = playerState,
+                        onSelectVagga = { vagga -> viewModel.selectDhammapadaVagga(vagga) },
+                        onSearchQueryChange = { q -> viewModel.setDhammapadaSearchQuery(q) },
+                        onPlayGatha = { sermon, queue -> viewModel.playSermon(sermon, queue) }
                     )
                 }
                 NavTab.JETHAVANARAMA -> {
@@ -290,14 +308,6 @@ fun MainAppScaffold(viewModel: MainViewModel) {
                         onRefresh = { viewModel.refreshShorts() },
                         onNextPage = { viewModel.nextPahuraShortsPage() },
                         onPreviousPage = { viewModel.previousPahuraShortsPage() }
-                    )
-                }
-                NavTab.NEWS -> {
-                    NewsScreen(
-                        newsList = newsItems,
-                        isLoading = isNewsLoading,
-                        newsExtractor = viewModel.newsExtractor,
-                        onRefresh = { viewModel.loadNewsFeed(forceRefresh = true) }
                     )
                 }
                 NavTab.DOWNLOADS -> {
