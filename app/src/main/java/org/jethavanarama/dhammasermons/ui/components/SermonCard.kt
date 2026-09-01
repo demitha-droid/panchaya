@@ -181,20 +181,6 @@ fun SermonCard(
                             maxHeight = 12.dp,
                             minHeight = 4.dp
                         )
-                    } else if (sermon.durationFormatted != null) {
-                        Surface(
-                            color = SurfaceDark,
-                            shape = RoundedCornerShape(6.dp),
-                            border = BorderStroke(0.5.dp, BorderDark)
-                        ) {
-                            Text(
-                                text = sermon.durationFormatted!!,
-                                color = TextSecondary,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
-                            )
-                        }
                     }
 
                     if (!sermon.date.isNullOrBlank()) {
