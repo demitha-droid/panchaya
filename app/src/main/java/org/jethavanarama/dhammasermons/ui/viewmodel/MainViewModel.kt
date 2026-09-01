@@ -22,6 +22,7 @@ import org.jethavanarama.dhammasermons.data.model.SermonCategory
 import org.jethavanarama.dhammasermons.data.model.Thero
 import org.jethavanarama.dhammasermons.player.AudioPlayerManager
 import org.jethavanarama.dhammasermons.player.PlayerUiState
+import org.jethavanarama.dhammasermons.ui.i18n.AppLanguage
 import org.jethavanarama.dhammasermons.ui.theme.ThemeMode
 
 @UnstableApi
@@ -48,6 +49,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun setThemeMode(mode: ThemeMode) {
         _themeMode.value = mode
         prefs.edit().putString("theme_mode", mode.name).apply()
+    }
+
+    // App Interface Language (Sinhala, English, German, Hindi, Tamil)
+    private val _appLanguage = MutableStateFlow(
+        try {
+            val saved = prefs.getString("app_language", AppLanguage.SINHALA.name)
+            AppLanguage.valueOf(saved ?: AppLanguage.SINHALA.name)
+        } catch (e: Exception) {
+            AppLanguage.SINHALA
+        }
+    )
+    val appLanguage: StateFlow<AppLanguage> = _appLanguage.asStateFlow()
+
+    fun setAppLanguage(language: AppLanguage) {
+        _appLanguage.value = language
+        prefs.edit().putString("app_language", language.name).apply()
     }
 
     private val jethavanaramaExtractor = JethavanaramaExtractor()

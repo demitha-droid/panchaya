@@ -29,6 +29,7 @@ import org.jethavanarama.dhammasermons.player.PlayerUiState
 import org.jethavanarama.dhammasermons.ui.components.DharmaChakraRefreshIndicator
 import org.jethavanarama.dhammasermons.ui.components.PaginationBar
 import org.jethavanarama.dhammasermons.ui.components.SermonCard
+import org.jethavanarama.dhammasermons.ui.i18n.strings
 import org.jethavanarama.dhammasermons.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,6 +45,7 @@ fun PahuraScreen(
     onNextPage: () -> Unit,
     onPreviousPage: () -> Unit
 ) {
+    val str = strings
     val listState = rememberLazyListState()
     val refreshState = rememberPullToRefreshState()
 
@@ -105,11 +107,16 @@ fun PahuraScreen(
 
                                 Column {
                                     Text(
-                                        text = "පහුර",
+                                        text = str.pahuraTitle,
                                         style = MaterialTheme.typography.titleLarge.copy(
                                             fontWeight = FontWeight.Bold,
                                             color = TextPrimary
                                         )
+                                    )
+                                    Text(
+                                        text = str.pahuraSubtitle,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = TextSecondary
                                     )
                                 }
                             }

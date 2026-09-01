@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import org.jethavanarama.dhammasermons.ui.i18n.strings
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,6 +48,7 @@ fun NewsScreen(
     newsExtractor: JethavanaramaNewsExtractor,
     onRefresh: () -> Unit
 ) {
+    val str = strings
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val refreshState = rememberPullToRefreshState()
@@ -108,14 +110,14 @@ fun NewsScreen(
 
                         Column {
                             Text(
-                                text = "ජෙතවනාරාම පුවත්",
+                                text = str.newsTitle,
                                 style = MaterialTheme.typography.titleMedium.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = TextPrimary
                                 )
                             )
                             Text(
-                                text = "Latest News & Events (jethavanarama.org)",
+                                text = str.newsSubtitle,
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     color = TextMuted
                                 )
@@ -490,7 +492,7 @@ fun NewsCard(
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Text(
-                                text = "ලිපිය කියවන්න (Read More)",
+                                text = strings.readArticle,
                                 color = SaffronGold,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold

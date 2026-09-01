@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jethavanarama.dhammasermons.ui.i18n.strings
 import org.jethavanarama.dhammasermons.ui.theme.*
 
 @Composable
@@ -25,6 +26,8 @@ fun PaginationBar(
     onNextPage: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val str = strings
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -57,12 +60,12 @@ fun PaginationBar(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Previous",
+                    contentDescription = str.prevPage,
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = "පෙර",
+                    text = str.prevPage,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -75,7 +78,7 @@ fun PaginationBar(
                     .padding(horizontal = 14.dp, vertical = 6.dp)
             ) {
                 Text(
-                    text = if (totalPages > 1) "පිටුව $currentPage / $totalPages" else "පිටුව $currentPage",
+                    text = if (totalPages > 1) "${str.page} $currentPage / $totalPages" else "${str.page} $currentPage",
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = SaffronPrimary,
@@ -98,14 +101,14 @@ fun PaginationBar(
                 contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
             ) {
                 Text(
-                    text = "ඊළඟ",
+                    text = str.nextPage,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = "Next",
+                    contentDescription = str.nextPage,
                     modifier = Modifier.size(16.dp)
                 )
             }

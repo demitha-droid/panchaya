@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import org.jethavanarama.dhammasermons.data.model.*
+import org.jethavanarama.dhammasermons.ui.i18n.strings
 import org.jethavanarama.dhammasermons.player.PlayerUiState
 import org.jethavanarama.dhammasermons.ui.components.DharmaChakraRefreshIndicator
 import org.jethavanarama.dhammasermons.ui.components.PaginationBar
@@ -55,10 +56,15 @@ fun JethavanaramaScreen(
     onNextPage: () -> Unit,
     onPreviousPage: () -> Unit
 ) {
-    var isTheroDropdownOpen by remember { mutableStateOf(false) }
-    var isLangDropdownOpen by remember { mutableStateOf(false) }
+    val str = strings
+    val sermons = paginatedSermons.sermons
+    val currentPage = paginatedSermons.currentPage
+    val totalPages = paginatedSermons.totalPages
     val listState = rememberLazyListState()
     val refreshState = rememberPullToRefreshState()
+
+    var isTheroDropdownOpen by remember { mutableStateOf(false) }
+    var isLangDropdownOpen by remember { mutableStateOf(false) }
 
     // Scroll to top when page changes
     LaunchedEffect(paginatedSermons.currentPage) {
@@ -84,7 +90,7 @@ fun JethavanaramaScreen(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = 120.dp)
         ) {
-            // Top Header
+            // Header
             item {
                 Column(
                     modifier = Modifier
@@ -98,14 +104,14 @@ fun JethavanaramaScreen(
                     ) {
                         Column {
                             Text(
-                                text = "ජෙතවනාරාමය",
+                                text = str.jethavanaramaTitle,
                                 style = MaterialTheme.typography.headlineMedium.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = TextPrimary
                                 )
                             )
                             Text(
-                                text = "Jethavanarama Buddhist Monastery",
+                                text = str.jethavanaramaSubtitle,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = TextSecondary
                             )
@@ -135,7 +141,7 @@ fun JethavanaramaScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text(
-                                        text = selectedThero?.name ?: "සියලු ස්වාමීන් වහන්සේලා",
+                                        text = selectedThero?.name ?: str.allTheros,
                                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                                         color = if (selectedThero != null) SaffronGold else TextSecondary,
                                         maxLines = 1,

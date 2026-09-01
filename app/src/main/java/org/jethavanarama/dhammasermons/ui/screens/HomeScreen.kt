@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import org.jethavanarama.dhammasermons.data.model.DownloadState
 import org.jethavanarama.dhammasermons.data.model.Sermon
+import org.jethavanarama.dhammasermons.ui.i18n.strings
 import org.jethavanarama.dhammasermons.data.model.SermonSource
 import org.jethavanarama.dhammasermons.player.PlayerUiState
 import org.jethavanarama.dhammasermons.ui.components.DharmaChakraRefreshIndicator
@@ -49,6 +50,7 @@ fun HomeScreen(
     onNavigateToJethavanarama: () -> Unit,
     onNavigateToPahura: () -> Unit
 ) {
+    val str = strings
     var searchQuery by remember { mutableStateOf("") }
     val refreshState = rememberPullToRefreshState()
 
@@ -94,14 +96,14 @@ fun HomeScreen(
                     ) {
                         Column {
                             Text(
-                                text = "ධර්ම දේශනා",
+                                text = str.homeTitle,
                                 style = MaterialTheme.typography.headlineMedium.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = TextPrimary
                                 )
                             )
                             Text(
-                                text = "Jethavanarama & Pahura Sermons",
+                                text = str.homeSubtitle,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = TextSecondary
                             )
@@ -116,7 +118,7 @@ fun HomeScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Settings,
-                                contentDescription = "Settings",
+                                contentDescription = str.settingsTitle,
                                 tint = SaffronPrimary,
                                 modifier = Modifier.size(20.dp)
                             )
@@ -130,7 +132,7 @@ fun HomeScreen(
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("දේශනා හෝ ස්වාමීන් වහන්සේ සොයන්න...", color = TextMuted, fontSize = 14.sp) },
+                        placeholder = { Text(str.searchPlaceholder, color = TextMuted, fontSize = 14.sp) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Search,
@@ -158,7 +160,7 @@ fun HomeScreen(
                 item {
                     Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
                         Text(
-                            text = "විශේෂිත දේශනාව",
+                            text = str.featuredSermon,
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontWeight = FontWeight.SemiBold,
                                 color = TextPrimary
@@ -276,7 +278,7 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (searchQuery.isBlank()) "නවතම ධර්ම දේශනා" else "සෙවුම් ප්‍රතිඵල (${filteredSermons.size})",
+                        text = if (searchQuery.isBlank()) str.recentSermons else "(${filteredSermons.size})",
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                             color = TextPrimary

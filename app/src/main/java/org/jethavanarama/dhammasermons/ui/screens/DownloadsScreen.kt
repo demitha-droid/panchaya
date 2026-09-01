@@ -28,6 +28,7 @@ import coil.compose.AsyncImage
 import org.jethavanarama.dhammasermons.data.downloader.ActiveDownloadItem
 import org.jethavanarama.dhammasermons.data.model.DownloadState
 import org.jethavanarama.dhammasermons.data.model.Sermon
+import org.jethavanarama.dhammasermons.ui.i18n.strings
 import org.jethavanarama.dhammasermons.player.PlayerUiState
 import org.jethavanarama.dhammasermons.ui.components.DharmaChakraRefreshIndicator
 import org.jethavanarama.dhammasermons.ui.components.SermonCard
@@ -48,9 +49,10 @@ fun DownloadsScreen(
     onRetryDownload: (Sermon) -> Unit,
     onRefresh: () -> Unit = {}
 ) {
+    val str = strings
     var searchQuery by remember { mutableStateOf("") }
-    var sermonToDelete by remember { mutableStateOf<Sermon?>(null) }
     val refreshState = rememberPullToRefreshState()
+    var sermonToDelete by remember { mutableStateOf<Sermon?>(null) }
 
     val filteredSermons = remember(downloadedSermons, searchQuery) {
         if (searchQuery.isBlank()) downloadedSermons
@@ -94,14 +96,14 @@ fun DownloadsScreen(
                         .padding(horizontal = 20.dp, vertical = 16.dp)
                 ) {
                     Text(
-                        text = "බාගත කිරීම් (Downloads)",
+                        text = str.downloadsTitle,
                         style = MaterialTheme.typography.headlineMedium.copy(
                             fontWeight = FontWeight.Bold,
                             color = TextPrimary
                         )
                     )
                     Text(
-                        text = "Offline Sermons & Storage Manager",
+                        text = str.downloadsSubtitle,
                         style = MaterialTheme.typography.bodyMedium,
                         color = TextSecondary
                     )
@@ -140,7 +142,7 @@ fun DownloadsScreen(
 
                                 Column {
                                     Text(
-                                        text = "භාවිතා කළ ඉඩ (Used Storage)",
+                                        text = str.storageUsed,
                                         style = MaterialTheme.typography.labelSmall,
                                         color = TextMuted
                                     )
@@ -159,7 +161,7 @@ fun DownloadsScreen(
                                 shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text(
-                                    text = "${downloadedSermons.size} ධර්ම දේශනා",
+                                    text = "${downloadedSermons.size}",
                                     style = MaterialTheme.typography.labelSmall.copy(
                                         fontWeight = FontWeight.SemiBold,
                                         color = SaffronGold
@@ -178,7 +180,7 @@ fun DownloadsScreen(
                             value = searchQuery,
                             onValueChange = { searchQuery = it },
                             modifier = Modifier.fillMaxWidth(),
-                            placeholder = { Text("බාගත කළ දේශනා සොයන්න...", color = TextMuted, fontSize = 14.sp) },
+                            placeholder = { Text(str.searchPlaceholder, color = TextMuted, fontSize = 14.sp) },
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Default.Search,
@@ -327,12 +329,12 @@ fun DownloadsScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = AccentPahuraRed)
                 ) {
-                    Text("ඉවත් කරන්න (Delete)", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(str.delete, color = Color.White, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { sermonToDelete = null }) {
-                    Text("අවලංගු කරන්න", color = TextMuted)
+                    Text(str.cancel, color = TextMuted)
                 }
             },
             containerColor = SurfaceCard,

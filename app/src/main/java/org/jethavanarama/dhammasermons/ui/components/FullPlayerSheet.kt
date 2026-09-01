@@ -29,6 +29,7 @@ import org.jethavanarama.dhammasermons.data.model.DownloadState
 import org.jethavanarama.dhammasermons.data.model.Sermon
 import org.jethavanarama.dhammasermons.data.model.SermonSource
 import org.jethavanarama.dhammasermons.player.PlayerUiState
+import org.jethavanarama.dhammasermons.ui.i18n.strings
 import org.jethavanarama.dhammasermons.ui.theme.*
 import java.util.Locale
 
@@ -396,11 +397,12 @@ fun FullPlayerSheet(
         }
     }
 
-    // Speed Selection Dialog
+    // Playback Speed Dialog
     if (showSpeedDialog) {
+        val str = strings
         AlertDialog(
             onDismissRequest = { showSpeedDialog = false },
-            title = { Text("Playback Speed", color = TextPrimary) },
+            title = { Text(str.playbackSpeed, color = TextPrimary) },
             containerColor = SurfaceCard,
             text = {
                 Column {
@@ -436,7 +438,7 @@ fun FullPlayerSheet(
             },
             confirmButton = {
                 TextButton(onClick = { showSpeedDialog = false }) {
-                    Text("Close", color = SaffronPrimary)
+                    Text(str.close, color = SaffronPrimary)
                 }
             }
         )
@@ -444,19 +446,20 @@ fun FullPlayerSheet(
 
     // Sleep Timer Dialog
     if (showSleepTimerDialog) {
+        val str = strings
         AlertDialog(
             onDismissRequest = { showSleepTimerDialog = false },
-            title = { Text("Sleep Timer", color = TextPrimary) },
+            title = { Text(str.sleepTimer, color = TextPrimary) },
             containerColor = SurfaceCard,
             text = {
                 Column {
                     val options = listOf(
-                        "Off" to 0,
-                        "15 minutes" to 15,
-                        "30 minutes" to 30,
-                        "45 minutes" to 45,
-                        "60 minutes" to 60,
-                        "End of Sermon" to -1
+                        str.off to 0,
+                        "15 ${str.minutes}" to 15,
+                        "30 ${str.minutes}" to 30,
+                        "45 ${str.minutes}" to 45,
+                        "60 ${str.minutes}" to 60,
+                        str.endOfSermon to -1
                     )
                     options.forEach { (label, minutes) ->
                         Row(
@@ -480,7 +483,7 @@ fun FullPlayerSheet(
             },
             confirmButton = {
                 TextButton(onClick = { showSleepTimerDialog = false }) {
-                    Text("Cancel", color = SaffronPrimary)
+                    Text(str.cancel, color = SaffronPrimary)
                 }
             }
         )

@@ -23,6 +23,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jethavanarama.dhammasermons.ui.i18n.AppLanguage
+import org.jethavanarama.dhammasermons.ui.i18n.strings
 import org.jethavanarama.dhammasermons.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,10 +32,13 @@ import org.jethavanarama.dhammasermons.ui.theme.*
 fun SettingsSheet(
     currentThemeMode: ThemeMode,
     onThemeModeSelect: (ThemeMode) -> Unit,
+    currentLanguage: AppLanguage,
+    onLanguageSelect: (AppLanguage) -> Unit,
     onRefreshFeeds: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
+    val str = strings
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -62,7 +67,7 @@ fun SettingsSheet(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "සැකසුම් (Settings)",
+                    text = str.settingsTitle,
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Bold,
                         color = TextPrimary
@@ -83,9 +88,79 @@ fun SettingsSheet(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Section 1: Appearance & Theme
+            // Section 1: Language Selection (5 Languages)
             Text(
-                text = "තේමාව (Appearance / Theme)",
+                text = str.languageSection,
+                style = MaterialTheme.typography.titleSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = SaffronPrimary
+                )
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Surface(
+                color = SurfaceCard,
+                shape = RoundedCornerShape(18.dp),
+                border = BorderStroke(1.dp, BorderDark),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(8.dp)) {
+                    AppLanguage.values().forEach { lang ->
+                        val isSelected = currentLanguage == lang
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (isSelected) SurfaceHighlight else androidx.compose.ui.graphics.Color.Transparent)
+                                .clickable { onLanguageSelect(lang) }
+                                .padding(horizontal = 14.dp, vertical = 11.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = isSelected,
+                                onClick = { onLanguageSelect(lang) },
+                                colors = RadioButtonDefaults.colors(
+                                    selectedColor = SaffronPrimary,
+                                    unselectedColor = TextSecondary
+                                )
+                            )
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = lang.nativeName,
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        color = if (isSelected) SaffronPrimary else TextPrimary
+                                    )
+                                )
+                                Text(
+                                    text = lang.englishName,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextSecondary
+                                )
+                            }
+
+                            if (isSelected) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    tint = SaffronPrimary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Section 2: Appearance & Theme
+            Text(
+                text = str.appearance,
                 style = MaterialTheme.typography.titleSmall.copy(
                     fontWeight = FontWeight.Bold,
                     color = SaffronPrimary
@@ -103,6 +178,11 @@ fun SettingsSheet(
                 Column(modifier = Modifier.padding(8.dp)) {
                     ThemeMode.values().forEach { mode ->
                         val isSelected = currentThemeMode == mode
+                        val (modeTitle, modeSub) = when (mode) {
+                            ThemeMode.LIGHT_KYOTO -> str.themeKyoto to str.themeKyotoSub
+                            ThemeMode.DARK_OBSIDIAN -> str.themeObsidian to str.themeObsidianSub
+                            ThemeMode.SYSTEM -> str.themeSystem to str.themeSystemSub
+                        }
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -125,14 +205,14 @@ fun SettingsSheet(
 
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = mode.title,
+                                    text = modeTitle,
                                     style = MaterialTheme.typography.bodyMedium.copy(
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                         color = if (isSelected) SaffronPrimary else TextPrimary
                                     )
                                 )
                                 Text(
-                                    text = mode.subtitle,
+                                    text = modeSub,
                                     style = MaterialTheme.typography.bodySmall,
                                     color = TextSecondary
                                 )
@@ -153,9 +233,9 @@ fun SettingsSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Section 2: Data & Sync
+            // Section 3: Data & Sync
             Text(
-                text = "දත්ත සහ සමමුහුර්තකරණය (Data & Sync)",
+                text = str.dataAndSync,
                 style = MaterialTheme.typography.titleSmall.copy(
                     fontWeight = FontWeight.Bold,
                     color = SaffronPrimary
@@ -200,12 +280,12 @@ fun SettingsSheet(
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
                                 Text(
-                                    text = "දේශනා නැවත පූරණය කරන්න",
+                                    text = str.forceRefresh,
                                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                                     color = TextPrimary
                                 )
                                 Text(
-                                    text = "Force refresh all sermon catalogs",
+                                    text = str.forceRefreshSub,
                                     style = MaterialTheme.typography.bodySmall,
                                     color = TextSecondary
                                 )
@@ -224,9 +304,9 @@ fun SettingsSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Section 3: About & Info
+            // Section 4: About & Info
             Text(
-                text = "යෙදුම පිළිබඳව (About)",
+                text = str.aboutSection,
                 style = MaterialTheme.typography.titleSmall.copy(
                     fontWeight = FontWeight.Bold,
                     color = SaffronPrimary
@@ -251,13 +331,13 @@ fun SettingsSheet(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Version 1.0.0 (Release v1.1.0)",
+                        text = "Version 1.0.0 (Release v1.4.0)",
                         style = MaterialTheme.typography.bodySmall,
                         color = TextSecondary
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = "ජෙතවනාරාම විහාර භූමියේ සහ පහුර ධර්ම දේශනා ඇතුළත් නිදහස් විවෘත මූලාශ්‍ර යෙදුමකි.",
+                        text = str.appDescription,
                         style = MaterialTheme.typography.bodySmall,
                         color = TextMuted
                     )
@@ -283,7 +363,7 @@ fun SettingsSheet(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "GitHub Repository (Open Source GPLv3)",
+                                text = str.githubRepo,
                                 style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
                                 color = SaffronPrimary
                             )

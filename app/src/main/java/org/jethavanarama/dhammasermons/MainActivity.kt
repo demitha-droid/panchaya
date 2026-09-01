@@ -37,6 +37,11 @@ import org.jethavanarama.dhammasermons.data.model.DownloadState
 import org.jethavanarama.dhammasermons.ui.components.FullPlayerSheet
 import org.jethavanarama.dhammasermons.ui.components.MiniPlayer
 import org.jethavanarama.dhammasermons.ui.components.SettingsSheet
+import org.jethavanarama.dhammasermons.ui.i18n.AppLanguage
+import org.jethavanarama.dhammasermons.ui.i18n.AppStrings
+import org.jethavanarama.dhammasermons.ui.i18n.LocalAppStrings
+import org.jethavanarama.dhammasermons.ui.i18n.getStrings
+import org.jethavanarama.dhammasermons.ui.i18n.strings
 import org.jethavanarama.dhammasermons.ui.screens.DownloadsScreen
 import org.jethavanarama.dhammasermons.ui.screens.HomeScreen
 import org.jethavanarama.dhammasermons.ui.screens.JethavanaramaScreen
@@ -47,16 +52,24 @@ import org.jethavanarama.dhammasermons.ui.theme.*
 import org.jethavanarama.dhammasermons.ui.viewmodel.MainViewModel
 
 enum class NavTab(
-    val title: String,
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector
 ) {
-    HOME("Home", Icons.Filled.Home, Icons.Outlined.Home),
-    JETHAVANARAMA("Main", Icons.Filled.SelfImprovement, Icons.Outlined.SelfImprovement),
-    PAHURA("Pahura", Icons.Filled.Subscriptions, Icons.Outlined.Subscriptions),
-    SHORTS("Shorts", Icons.Filled.PlayCircleFilled, Icons.Outlined.PlayCircleOutline),
-    NEWS("News", Icons.AutoMirrored.Filled.Article, Icons.AutoMirrored.Outlined.Article),
-    DOWNLOADS("Downloads", Icons.Filled.CloudDownload, Icons.Outlined.CloudDownload)
+    HOME(Icons.Filled.Home, Icons.Outlined.Home),
+    JETHAVANARAMA(Icons.Filled.SelfImprovement, Icons.Outlined.SelfImprovement),
+    PAHURA(Icons.Filled.Subscriptions, Icons.Outlined.Subscriptions),
+    SHORTS(Icons.Filled.PlayCircleFilled, Icons.Outlined.PlayCircleOutline),
+    NEWS(Icons.AutoMirrored.Filled.Article, Icons.AutoMirrored.Outlined.Article),
+    DOWNLOADS(Icons.Filled.CloudDownload, Icons.Outlined.CloudDownload);
+
+    fun getTitle(str: AppStrings): String = when (this) {
+        HOME -> str.tabHome
+        JETHAVANARAMA -> str.tabJethavanarama
+        PAHURA -> str.tabPahura
+        SHORTS -> str.tabShorts
+        NEWS -> str.tabNews
+        DOWNLOADS -> str.tabDownloads
+    }
 }
 
 @UnstableApi
@@ -83,8 +96,13 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val themeMode by viewModel.themeMode.collectAsState()
-            DhammaSermonsTheme(themeMode = themeMode) {
-                MainAppScaffold(viewModel = viewModel)
+            val appLanguage by viewModel.appLanguage.collectAsState()
+            val currentStrings = appLanguage.getStrings()
+
+            CompositionLocalProvider(LocalAppStrings provides currentStrings) {
+                DhammaSermonsTheme(themeMode = themeMode) {
+                    MainAppScaffold(viewModel = viewModel)
+                }
             }
         }
     }
@@ -163,6 +181,7 @@ fun MainAppScaffold(viewModel: MainViewModel) {
                 NavTab.entries.forEach { tab ->
                     val isSelected = selectedTab == tab
                     val badgeCount = if (tab == NavTab.DOWNLOADS) activeDownloads.size else 0
+                    val tabTitle = tab.getTitle(strings)
 
                     NavigationBarItem(
                         selected = isSelected,
@@ -179,13 +198,13 @@ fun MainAppScaffold(viewModel: MainViewModel) {
                             ) {
                                 Icon(
                                     imageVector = if (isSelected) tab.selectedIcon else tab.unselectedIcon,
-                                    contentDescription = tab.title
+                                    contentDescription = tabTitle
                                 )
                             }
                         },
                         label = {
                             Text(
-                                text = tab.title,
+                                text = tabTitle,
                                 fontSize = 9.5.sp,
                                 maxLines = 1,
                                 softWrap = false,
@@ -331,9 +350,12 @@ fun MainAppScaffold(viewModel: MainViewModel) {
             // Settings Modal Bottom Sheet
             if (showSettingsSheet) {
                 val currentThemeMode by viewModel.themeMode.collectAsState()
+                val currentLanguage by viewModel.appLanguage.collectAsState()
                 SettingsSheet(
                     currentThemeMode = currentThemeMode,
                     onThemeModeSelect = { viewModel.setThemeMode(it) },
+                    currentLanguage = currentLanguage,
+                    onLanguageSelect = { viewModel.setAppLanguage(it) },
                     onRefreshFeeds = { viewModel.refreshAllFeeds(forceNetworkRefresh = true) },
                     onDismiss = { showSettingsSheet = false }
                 )
