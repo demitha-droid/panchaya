@@ -91,12 +91,12 @@ data class AppStrings(
 )
 
 val SinhalaStrings = AppStrings(
-    tabHome = "මුල්\nපිටුව",
+    tabHome = "මුල් පිටුව",
     tabJethavanarama = "ප්‍රධාන",
     tabPahura = "පහුර",
     tabDhammapada = "ධම්මපදය",
-    tabShorts = "කෙටි\nවීඩියෝ",
-    tabDownloads = "බාගත\nකිරීම්",
+    tabShorts = "කෙටි දර්ශන",
+    tabDownloads = "බාගත කිරීම්",
 
     homeTitle = "ධර්ම දේශනා",
     homeSubtitle = "ජෙතවනාරාම සහ පහුර දේශනා",
@@ -129,7 +129,7 @@ val SinhalaStrings = AppStrings(
     nextPage = "මීළඟ",
     retry = "නැවත උත්සාහ කරන්න",
 
-    shortsTitle = "ධර්ම කෙටි වීඩියෝ (Shorts)",
+    shortsTitle = "ධර්ම කෙටි දර්ශන (Shorts)",
 
     downloadsTitle = "බාගත කිරීම් (Downloads)",
     downloadsSubtitle = "නොබැඳි දේශනා සහ මතක කළමනාකරණය",
