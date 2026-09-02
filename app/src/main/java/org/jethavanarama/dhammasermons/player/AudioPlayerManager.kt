@@ -125,20 +125,7 @@ class AudioPlayerManager private constructor(private val context: Context) {
     private var sleepTimer: CountDownTimer? = null
 
     init {
-        // Restore last played sermon state upon app launch
-        val lastSermon = progressManager.getLastPlayedSermon()
-        if (lastSermon != null) {
-            val savedPos = progressManager.getSavedPosition(lastSermon.id)
-            val savedDur = progressManager.getSavedDuration(lastSermon.id)
-            _uiState.value = _uiState.value.copy(
-                currentSermon = lastSermon,
-                currentPositionMs = savedPos,
-                durationMs = savedDur,
-                isPlaying = false,
-                queue = listOf(lastSermon)
-            )
-            setupInitialMediaItem(lastSermon, savedPos)
-        }
+        // Player starts idle and closed until user explicitly plays a sermon
     }
 
     fun setupInitialMediaItem(sermon: Sermon, positionMs: Long = 0L) {

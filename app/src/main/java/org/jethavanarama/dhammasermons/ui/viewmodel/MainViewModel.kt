@@ -200,10 +200,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 _homeSermons.value = combined
                 resolveMissingHomeDurations(combined)
-
-                if (playerManager.uiState.value.currentSermon == null && combined.isNotEmpty()) {
-                    playerManager.setupInitialSermon(combined.first())
-                }
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
