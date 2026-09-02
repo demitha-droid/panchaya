@@ -18,6 +18,8 @@ newpipeExtractor = "v0.24.4"
 youtubePlayer = "12.1.1"
 gson = "2.11.0"
 work = "2.9.1"
+googleServices = "4.4.2"
+firebaseBom = "33.7.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -59,8 +61,13 @@ gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 # Free YouTube Media Extractor
 newpipe-extractor = { group = "com.github.TeamNewPipe.NewPipeExtractor", name = "extractor", version.ref = "newpipeExtractor" }
 
+# Firebase
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "503286449354",
+    "project_id": "do-app-77580",
+    "storage_bucket": "do-app-77580.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:503286449354:android:21033caa424eea5b46e033",
+        "android_client_info": {
+          "package_name": "org.jethavanarama.dhammasermons"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpmHJE6g_RQOMq4ZTB1IM3nMf3BrcxgRg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
