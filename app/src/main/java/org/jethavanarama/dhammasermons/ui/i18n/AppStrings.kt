@@ -87,7 +87,15 @@ data class AppStrings(
     val forceRefreshSub: String,
     val aboutSection: String,
     val appDescription: String,
-    val githubRepo: String
+    val githubRepo: String,
+
+    // Resume Reminder Alarm
+    val resumeReminderTitle: String,
+    val resumeReminderSubtitle: String,
+    val resumeButton: String,
+    val remindIn6Hours: String,
+    val stopAlarm: String,
+    val listeningProgress: String
 )
 
 val SinhalaStrings = AppStrings(
@@ -165,7 +173,14 @@ val SinhalaStrings = AppStrings(
     forceRefreshSub = "සියලුම දේශනා නාමාවලි නැවත පූරණය කරයි",
     aboutSection = "යෙදුම පිළිබඳව (About)",
     appDescription = "ජෙතවනාරාම විහාර භූමියේ සහ පහුර ධර්ම දේශනා ඇතුළත් නිදහස් විවෘත මූලාශ්‍ර යෙදුමකි.",
-    githubRepo = "GitHub Repository (Open Source GPLv3)"
+    githubRepo = "GitHub Repository (Open Source GPLv3)",
+
+    resumeReminderTitle = "දේශනාවට නැවත සවන් දෙන්න",
+    resumeReminderSubtitle = "ඔබ පැය 1කට වඩා මෙම දේශනාවට සවන් දී ඇත. ඉතිරි කොටසට සවන් දෙන්න.",
+    resumeButton = "නැවත අරඹන්න",
+    remindIn6Hours = "පැය 6කින් නැවත මතක් කරන්න",
+    stopAlarm = "මතක් කිරීම නවත්වන්න",
+    listeningProgress = "සවන් දුන් කාලය"
 )
 
 val EnglishStrings = AppStrings(
@@ -243,7 +258,14 @@ val EnglishStrings = AppStrings(
     forceRefreshSub = "Reloads all sermon catalogs from server",
     aboutSection = "About",
     appDescription = "A free and open-source Buddhist Dhamma sermons streaming and offline player application.",
-    githubRepo = "GitHub Repository (Open Source GPLv3)"
+    githubRepo = "GitHub Repository (Open Source GPLv3)",
+
+    resumeReminderTitle = "Resume Listening to Sermon",
+    resumeReminderSubtitle = "You've listened for over an hour. Resume where you left off.",
+    resumeButton = "Resume Listening",
+    remindIn6Hours = "Remind in 6 Hours",
+    stopAlarm = "Stop Reminder",
+    listeningProgress = "Listening Progress"
 )
 
 val GermanStrings = AppStrings(
@@ -321,7 +343,14 @@ val GermanStrings = AppStrings(
     forceRefreshSub = "Aktualisiert alle Predigten vom Server",
     aboutSection = "Über die App",
     appDescription = "Eine freie und quelloffene Anwendung zum Hören und Herunterladen buddhistischer Dhamma-Predigten.",
-    githubRepo = "GitHub Repository (Open Source GPLv3)"
+    githubRepo = "GitHub Repository (Open Source GPLv3)",
+
+    resumeReminderTitle = "Dhamma-Vortrag fortsetzen",
+    resumeReminderSubtitle = "Sie haben über eine Stunde zugehört. Hören Sie weiter.",
+    resumeButton = "Weiterhören",
+    remindIn6Hours = "In 6 Stunden erinnern",
+    stopAlarm = "Erinnerung beenden",
+    listeningProgress = "Hörfortschritt"
 )
 
 val HindiStrings = AppStrings(
@@ -399,7 +428,14 @@ val HindiStrings = AppStrings(
     forceRefreshSub = "सर्वर से सभी उपदेश फिर से लोड करें",
     aboutSection = "के बारे में",
     appDescription = "बौद्ध धम्म उपदेशों को सुनने और ऑफ़लाइन सहेजने के लिए एक मुफ़्त और ओपन-सोर्स ऐप।",
-    githubRepo = "GitHub Repository (Open Source GPLv3)"
+    githubRepo = "GitHub Repository (Open Source GPLv3)",
+
+    resumeReminderTitle = "उपदेश फिर से सुनें",
+    resumeReminderSubtitle = "आपने 1 घंटे से अधिक सुना है। जहां छोड़ा था वहां से जारी रखें।",
+    resumeButton = "फिर से सुनें",
+    remindIn6Hours = "6 घंटे बाद याद दिलाएं",
+    stopAlarm = "अलार्म बंद करें",
+    listeningProgress = "प्रगति"
 )
 
 val TamilStrings = AppStrings(
@@ -477,7 +513,14 @@ val TamilStrings = AppStrings(
     forceRefreshSub = "சேவையகத்திலிருந்து அனைத்து போதனைகளையும் மீண்டும் ஏற்றவும்",
     aboutSection = "பற்றி",
     appDescription = "பௌத்த தம்ம போதனைகளை கேட்பதற்கும் பதிவிறக்குவதற்குமான இலவச திறந்த மூல பயன்பாடு.",
-    githubRepo = "GitHub Repository (Open Source GPLv3)"
+    githubRepo = "GitHub Repository (Open Source GPLv3)",
+
+    resumeReminderTitle = "போதனையை மீண்டும் கேளுங்கள்",
+    resumeReminderSubtitle = "நீங்கள் 1 மணி நேரத்திற்கும் மேலாக கேட்டுள்ளீர்கள். தொடரவும்.",
+    resumeButton = "மீண்டும் தொடங்கு",
+    remindIn6Hours = "6 மணி நேரத்தில் நினைவூட்டு",
+    stopAlarm = "நினைவூட்டலை நிறுத்து",
+    listeningProgress = "கேட்ட நேரம்"
 )
 
 fun AppLanguage.getStrings(): AppStrings {

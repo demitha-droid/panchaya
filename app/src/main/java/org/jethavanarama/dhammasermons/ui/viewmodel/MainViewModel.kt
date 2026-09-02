@@ -8,6 +8,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.google.firebase.analytics.FirebaseAnalytics
+import android.os.Bundle
 import org.jethavanarama.dhammasermons.DhammaApp
 import org.jethavanarama.dhammasermons.data.db.AppDatabase
 import org.jethavanarama.dhammasermons.data.downloader.ActiveDownloadItem
@@ -37,6 +39,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val db = AppDatabase.getDatabase(application)
     private val sermonDao = db.sermonDao()
     private val prefs = application.getSharedPreferences("panchaya_settings", android.content.Context.MODE_PRIVATE)
+    private val analytics by lazy {
+        try {
+            FirebaseAnalytics.getInstance(application)
+        } catch (e: Exception) {
+            null
+        }
+    }
 
     // Theme Mode
     private val _themeMode = MutableStateFlow(
@@ -52,6 +61,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun setThemeMode(mode: ThemeMode) {
         _themeMode.value = mode
         prefs.edit().putString("theme_mode", mode.name).apply()
+        try {
+            val bundle = Bundle().apply { putString("theme", mode.name) }
+            analytics?.logEvent("change_theme", bundle)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     // App Interface Language (Sinhala, English, German, Hindi, Tamil)
@@ -68,6 +83,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun setAppLanguage(language: AppLanguage) {
         _appLanguage.value = language
         prefs.edit().putString("app_language", language.name).apply()
+        try {
+            val bundle = Bundle().apply { putString("language", language.name) }
+            analytics?.logEvent("change_language", bundle)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private val jethavanaramaExtractor = JethavanaramaExtractor()
@@ -388,6 +409,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun playSermon(sermon: Sermon, queue: List<Sermon> = emptyList()) {
+        try {
+            val bundle = Bundle().apply {
+                putString("sermon_id", sermon.id)
+                putString("sermon_title", sermon.title.take(100))
+                putString("sermon_thero", sermon.thero.take(100))
+                putString("sermon_source", sermon.source.name)
+            }
+            analytics?.logEvent("play_sermon", bundle)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         playerManager.playSermon(sermon, queue)
     }
 
@@ -446,6 +478,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun startDownload(sermon: Sermon) {
+        try {
+            val bundle = Bundle().apply {
+                putString("sermon_id", sermon.id)
+                putString("sermon_title", sermon.title.take(100))
+                putString("sermon_thero", sermon.thero.take(100))
+            }
+            analytics?.logEvent("download_sermon", bundle)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         downloadManager.startDownload(sermon)
         updateStorageUsage()
     }

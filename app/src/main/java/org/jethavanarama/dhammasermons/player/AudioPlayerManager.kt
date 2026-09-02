@@ -27,6 +27,7 @@ import org.jethavanarama.dhammasermons.data.extractor.JethavanaramaExtractor
 import org.jethavanarama.dhammasermons.data.extractor.PahuraYouTubeExtractor
 import org.jethavanarama.dhammasermons.data.model.Sermon
 import org.jethavanarama.dhammasermons.data.model.SermonSource
+import org.jethavanarama.dhammasermons.notifications.SermonResumeReminderManager
 import java.util.concurrent.TimeUnit
 
 data class PlayerUiState(
@@ -70,10 +71,30 @@ class AudioPlayerManager private constructor(private val context: Context) {
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
                     _uiState.value = _uiState.value.copy(isPlaying = isPlaying)
                     if (isPlaying) {
+                        sessionPlayStartTime = System.currentTimeMillis()
+                        // User is actively listening; dismiss any active reminder notification
+                        SermonResumeReminderManager.dismissNotification(context)
                         startProgressTracker()
                     } else {
+                        if (sessionPlayStartTime > 0L) {
+                            sessionListeningTimeMs += (System.currentTimeMillis() - sessionPlayStartTime)
+                            sessionPlayStartTime = 0L
+                        }
                         saveCurrentPositionNow()
                         stopProgressTracker()
+
+                        val curSermon = _uiState.value.currentSermon
+                        if (curSermon != null) {
+                            val curPos = player.currentPosition.coerceAtLeast(0L)
+                            val dur = player.duration.coerceAtLeast(0L)
+                            SermonResumeReminderManager.checkAndScheduleOnStop(
+                                context = context,
+                                sermon = curSermon,
+                                positionMs = curPos,
+                                durationMs = dur,
+                                sessionListenTimeMs = sessionListeningTimeMs
+                            )
+                        }
                     }
                 }
 
@@ -93,7 +114,10 @@ class AudioPlayerManager private constructor(private val context: Context) {
                             val endedSermon = _uiState.value.currentSermon
                             if (endedSermon != null) {
                                 progressManager.clearProgress(endedSermon.id)
+                                SermonResumeReminderManager.stopAlarm(context)
                             }
+                            sessionListeningTimeMs = 0L
+                            sessionPlayStartTime = 0L
                             _uiState.value = _uiState.value.copy(
                                 isPlaying = false,
                                 isBuffering = false,
@@ -123,6 +147,8 @@ class AudioPlayerManager private constructor(private val context: Context) {
     private var progressJob: Job? = null
     private var resolveAndPlayJob: Job? = null
     private var sleepTimer: CountDownTimer? = null
+    private var sessionPlayStartTime: Long = 0L
+    private var sessionListeningTimeMs: Long = 0L
 
     init {
         // Player starts idle and closed until user explicitly plays a sermon
@@ -176,6 +202,11 @@ class AudioPlayerManager private constructor(private val context: Context) {
     fun playSermon(sermon: Sermon, newQueue: List<Sermon> = emptyList()) {
         // Save position of current playing sermon before switching
         saveCurrentPositionNow()
+
+        if (_uiState.value.currentSermon?.id != sermon.id) {
+            sessionListeningTimeMs = 0L
+            sessionPlayStartTime = 0L
+        }
 
         // 1. Immediately cancel any pending resolution
         resolveAndPlayJob?.cancel()
@@ -420,6 +451,22 @@ class AudioPlayerManager private constructor(private val context: Context) {
      * Dismisses the floating mini player, stops playback and cleans up current sermon.
      */
     fun dismissMiniPlayer() {
+        if (sessionPlayStartTime > 0L) {
+            sessionListeningTimeMs += (System.currentTimeMillis() - sessionPlayStartTime)
+            sessionPlayStartTime = 0L
+        }
+        val curSermon = _uiState.value.currentSermon
+        val curPos = player.currentPosition.coerceAtLeast(0L)
+        val dur = player.duration.coerceAtLeast(0L)
+        if (curSermon != null) {
+            SermonResumeReminderManager.checkAndScheduleOnStop(
+                context = context,
+                sermon = curSermon,
+                positionMs = curPos,
+                durationMs = dur,
+                sessionListenTimeMs = sessionListeningTimeMs
+            )
+        }
         saveCurrentPositionNow()
         player.pause()
         player.stop()

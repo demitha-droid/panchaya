@@ -11,6 +11,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
         android:name=".DhammaApp"
@@ -49,6 +51,24 @@
             android:name=".data.downloader.DownloadForegroundService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+
+        <!-- Full-Screen Resume Reminder Activity -->
+        <activity
+            android:name=".notifications.SermonResumeReminderActivity"
+            android:exported="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.DhammaSermons" />
+
+        <!-- 6-Hour Sermon Resume Alarm & Action Receivers -->
+        <receiver
+            android:name=".notifications.SermonResumeAlarmReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".notifications.SermonResumeActionReceiver"
+            android:exported="false" />
 
     </application>
 

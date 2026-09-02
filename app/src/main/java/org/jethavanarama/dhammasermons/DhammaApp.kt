@@ -4,7 +4,10 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
+import android.os.Bundle
 import androidx.media3.common.util.UnstableApi
+import com.google.firebase.FirebaseApp
+import com.google.firebase.analytics.FirebaseAnalytics
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.disk.DiskCache
@@ -32,6 +35,16 @@ class DhammaApp : Application(), ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
+
+        // 0. Initialize Firebase & Analytics explicitly
+        try {
+            FirebaseApp.initializeApp(this)
+            val analytics = FirebaseAnalytics.getInstance(this)
+            analytics.setAnalyticsCollectionEnabled(true)
+            analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, Bundle())
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
         // 1. Create playback notification channel early
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -65,6 +78,7 @@ class DhammaApp : Application(), ImageLoaderFactory {
         // 3. Schedule background periodic worker for new sermon release notifications
         try {
             org.jethavanarama.dhammasermons.notifications.NewSermonNotificationManager.schedulePeriodicCheck(this)
+            org.jethavanarama.dhammasermons.notifications.SermonResumeReminderManager.createNotificationChannel(this)
         } catch (e: Exception) {
             e.printStackTrace()
         }

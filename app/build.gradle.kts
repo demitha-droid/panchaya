@@ -14,8 +14,8 @@ android {
         applicationId = "org.jethavanarama.dhammasermons"
         minSdk = 26
         targetSdk = 35
-        versionCode = 9
-        versionName = "1.5.3"
+        versionCode = 10
+        versionName = "1.6.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
