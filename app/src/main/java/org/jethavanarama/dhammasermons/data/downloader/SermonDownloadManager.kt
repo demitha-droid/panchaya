@@ -1,6 +1,11 @@
 package org.jethavanarama.dhammasermons.data.downloader
 
+import android.content.ContentValues
 import android.content.Context
+import android.media.MediaScannerConnection
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -22,6 +27,7 @@ import org.jethavanarama.dhammasermons.data.model.DownloadState
 import org.jethavanarama.dhammasermons.data.model.Sermon
 import org.jethavanarama.dhammasermons.data.model.SermonSource
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
@@ -227,7 +233,10 @@ class SermonDownloadManager(
                     return@launch
                 }
 
-                // 3. Mark as downloaded in Room DB
+                // 3. Save copy of the MP3 to the public system Downloads/DhammaSermons folder
+                saveToPublicDownloadsFolder(outputFile, resolvedSermon)
+
+                // 4. Mark as downloaded in Room DB
                 val updatedSermon = resolvedSermon.copy(
                     localFilePath = outputFile.absolutePath,
                     downloadState = DownloadState.Downloaded(outputFile.absolutePath)
@@ -357,5 +366,70 @@ class SermonDownloadManager(
 
     private fun updateActiveDownloadsList() {
         _activeDownloads.value = activeDownloadMap.values.toList()
+    }
+
+    /**
+     * Copies or exports the downloaded audio file to the public Downloads/DhammaSermons folder
+     * using MediaStore (API 29+) or legacy public file storage (API <= 28).
+     * This ensures the MP3 remains on the user's device even if the app is uninstalled.
+     */
+    private fun saveToPublicDownloadsFolder(sourceFile: File, sermon: Sermon) {
+        try {
+            val cleanTitle = sermon.title.replace("[\\\\/:*?\"<>|]".toRegex(), " ").trim().take(80)
+            val cleanThero = sermon.thero.replace("[\\\\/:*?\"<>|]".toRegex(), " ").trim().take(40)
+            val ext = if (sourceFile.name.endsWith(".m4a", ignoreCase = true)) "m4a" else "mp3"
+            val mimeType = if (ext == "m4a") "audio/mp4" else "audio/mpeg"
+            val publicFileName = if (cleanThero.isNotEmpty()) "$cleanTitle - $cleanThero.$ext" else "$cleanTitle.$ext"
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.Downloads.DISPLAY_NAME, publicFileName)
+                    put(MediaStore.Downloads.MIME_TYPE, mimeType)
+                    put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/DhammaSermons")
+                    put(MediaStore.Downloads.IS_PENDING, 1)
+                }
+
+                val resolver = context.contentResolver
+                val collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+                val itemUri = resolver.insert(collection, contentValues)
+
+                if (itemUri != null) {
+                    resolver.openOutputStream(itemUri)?.use { out ->
+                        FileInputStream(sourceFile).use { input ->
+                            input.copyTo(out)
+                        }
+                    }
+
+                    contentValues.clear()
+                    contentValues.put(MediaStore.Downloads.IS_PENDING, 0)
+                    resolver.update(itemUri, contentValues, null, null)
+                }
+            } else {
+                // Android 9 and below
+                val publicDir = File(
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                    "DhammaSermons"
+                )
+                if (!publicDir.exists()) {
+                    publicDir.mkdirs()
+                }
+                val destFile = File(publicDir, publicFileName)
+                FileInputStream(sourceFile).use { input ->
+                    FileOutputStream(destFile).use { output ->
+                        input.copyTo(output)
+                    }
+                }
+
+                // Notify media scanner
+                MediaScannerConnection.scanFile(
+                    context,
+                    arrayOf(destFile.absolutePath),
+                    arrayOf(mimeType),
+                    null
+                )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }
