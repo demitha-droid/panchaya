@@ -1,7 +1,9 @@
 package org.jethavanarama.dhammasermons.ui.screens
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,11 +26,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import org.jethavanarama.dhammasermons.R
 import org.jethavanarama.dhammasermons.data.model.DownloadState
 import org.jethavanarama.dhammasermons.data.model.Sermon
 import org.jethavanarama.dhammasermons.ui.i18n.strings
@@ -85,76 +89,80 @@ fun HomeScreen(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = 120.dp)
         ) {
-            // Header
+            // Header: Dhamma Chakraya on the left tucked partially behind Search Bar, Settings on the right
             item {
-                Column(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 16.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
-                            Text(
-                                text = str.homeTitle,
-                                style = MaterialTheme.typography.headlineMedium.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = TextPrimary
-                                )
-                            )
-                            Text(
-                                text = str.homeSubtitle,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = TextSecondary
-                            )
-                        }
-
-                        IconButton(
-                            onClick = onOpenSettings,
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(SurfaceCard)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Settings,
-                                contentDescription = str.settingsTitle,
-                                tint = SaffronPrimary,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Search Bar
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text(str.searchPlaceholder, color = TextMuted, fontSize = 14.sp) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "Search",
-                                tint = TextMuted
-                            )
-                        },
-                        singleLine = true,
-                        shape = RoundedCornerShape(16.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = SurfaceCard,
-                            unfocusedContainerColor = SurfaceCard,
-                            focusedBorderColor = SaffronPrimary,
-                            unfocusedBorderColor = BorderDark,
-                            cursorColor = SaffronPrimary,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary
-                        )
+                    // Dhamma Chakraya resting on the left with bottom ~1/4 tucked behind the search bar
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_dhamma_chakra),
+                        contentDescription = "Dhamma Chakraya",
+                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(SaffronPrimary),
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(start = 20.dp, top = 4.dp)
+                            .size(68.dp),
+                        contentScale = ContentScale.Fit
                     )
+
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        // Top Row: Settings Button on the right
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 6.dp),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            IconButton(
+                                onClick = onOpenSettings,
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(SurfaceCard)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Settings,
+                                    contentDescription = str.settingsTitle,
+                                    tint = SaffronPrimary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // Search Bar (drawn over the bottom of the Chakra)
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text(str.searchPlaceholder, color = TextMuted, fontSize = 14.sp) },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Search",
+                                    tint = TextMuted
+                                )
+                            },
+                            singleLine = true,
+                            shape = RoundedCornerShape(16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = SurfaceCard,
+                                unfocusedContainerColor = SurfaceCard,
+                                focusedBorderColor = SaffronPrimary,
+                                unfocusedBorderColor = BorderDark,
+                                cursorColor = SaffronPrimary,
+                                focusedTextColor = TextPrimary,
+                                unfocusedTextColor = TextPrimary
+                            )
+                        )
+                    }
                 }
             }
 
