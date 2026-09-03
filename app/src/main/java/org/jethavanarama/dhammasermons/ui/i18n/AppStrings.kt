@@ -34,6 +34,11 @@ data class AppStrings(
     val sinhalaMeaning: String,
     val searchDhammapada: String,
 
+    // Tripitaka
+    val tripitakaTitle: String,
+    val tripitakaSubtitle: String,
+    val searchTripitakaPlaceholder: String,
+
     // Jethavanarama & Pahura
     val jethavanaramaTitle: String,
     val jethavanaramaSubtitle: String,
@@ -127,6 +132,10 @@ val SinhalaStrings = AppStrings(
     sinhalaMeaning = "සිංහල තේරුම",
     searchDhammapada = "ගාථා හෝ කතා වස්තු සොයන්න...",
 
+    tripitakaTitle = "ත්‍රිපිටකය",
+    tripitakaSubtitle = "පාළි ත්‍රිපිටකය සහ සිංහල පරිවර්තන",
+    searchTripitakaPlaceholder = "සූත්‍ර හෝ ග්‍රන්ථ සොයන්න...",
+
     jethavanaramaTitle = "ජෙතවනාරාමය",
     jethavanaramaSubtitle = "ජෙතවනාරාම බෞද්ධ විහාර සංකීර්ණය",
     pahuraTitle = "පහුර",
@@ -213,6 +222,10 @@ val EnglishStrings = AppStrings(
     paliGatha = "Pali Verse",
     sinhalaMeaning = "Sinhala Translation",
     searchDhammapada = "Search verses or stories...",
+
+    tripitakaTitle = "Thripitakaya",
+    tripitakaSubtitle = "The Pali Canon and Translations",
+    searchTripitakaPlaceholder = "Search suttas or books...",
 
     jethavanaramaTitle = "Jethavanarama",
     jethavanaramaSubtitle = "Jethavanarama Buddhist Monastery",
@@ -301,6 +314,10 @@ val GermanStrings = AppStrings(
     sinhalaMeaning = "Singhalesische Erklärung",
     searchDhammapada = "Verse oder Geschichten suchen...",
 
+    tripitakaTitle = "Thripitakaya",
+    tripitakaSubtitle = "Der Pali-Kanon und Übersetzungen",
+    searchTripitakaPlaceholder = "Lehrreden oder Bücher suchen...",
+
     jethavanaramaTitle = "Jethavanarama",
     jethavanaramaSubtitle = "Buddhistisches Kloster Jethavanarama",
     pahuraTitle = "Pahura",
@@ -388,6 +405,10 @@ val HindiStrings = AppStrings(
     sinhalaMeaning = "सिंहल अर्थ",
     searchDhammapada = "गाथा या कथा खोजें...",
 
+    tripitakaTitle = "त्रिपिटक (Thripitakaya)",
+    tripitakaSubtitle = "पालि त्रिपिटक और अनुवाद",
+    searchTripitakaPlaceholder = "सूत्र या पुस्तकें खोजें...",
+
     jethavanaramaTitle = "जेतवनाराम",
     jethavanaramaSubtitle = "जेतवनाराम बौद्ध मठ",
     pahuraTitle = "पहुरा",
@@ -474,6 +495,10 @@ val TamilStrings = AppStrings(
     paliGatha = "பாலி செய்யுள்",
     sinhalaMeaning = "சிங்கள விளக்கம்",
     searchDhammapada = "செய்யுள் அல்லது கதையைத் தேடுங்கள்...",
+
+    tripitakaTitle = "திரிபிடகம் (Thripitakaya)",
+    tripitakaSubtitle = "பாலி திரிபிடகம் மற்றும் மொழிபெயர்ப்புகள்",
+    searchTripitakaPlaceholder = "சூத்திரங்கள் அல்லது புத்தகங்களைத் தேடுங்கள்...",
 
     jethavanaramaTitle = "ஜேதவனாராம",
     jethavanaramaSubtitle = "ஜேதவனாராம பௌத்த மடாலயம்",

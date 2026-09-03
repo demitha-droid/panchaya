@@ -42,6 +42,7 @@ import org.jethavanarama.dhammasermons.R
 import org.jethavanarama.dhammasermons.data.model.TripitakaNode
 import org.jethavanarama.dhammasermons.data.model.TripitakaParagraph
 import org.jethavanarama.dhammasermons.data.model.TripitakaVaggaContent
+import org.jethavanarama.dhammasermons.ui.i18n.strings
 import org.jethavanarama.dhammasermons.ui.theme.*
 
 private enum class TripitakaLangMode(val label: String) {
@@ -154,6 +155,8 @@ private fun PitakaExplorerView(
     onSearchQueryChange: (String) -> Unit,
     onBack: () -> Unit
 ) {
+    val str = strings
+
     Column(modifier = Modifier.fillMaxSize()) {
         // Top App Bar
         TopAppBar(
@@ -167,7 +170,7 @@ private fun PitakaExplorerView(
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = "ත්‍රිපිටකය",
+                        text = str.tripitakaTitle,
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
                             color = TextPrimary
@@ -212,7 +215,7 @@ private fun PitakaExplorerView(
                     onValueChange = onSearchQueryChange,
                     placeholder = {
                         Text(
-                            text = "සූත්‍ර හෝ ග්‍රන්ථ සොයන්න...",
+                            text = str.searchTripitakaPlaceholder,
                             style = MaterialTheme.typography.bodyMedium,
                             color = TextMuted
                         )

@@ -194,13 +194,16 @@ fun MainAppScaffold(viewModel: MainViewModel) {
                 tonalElevation = 4.dp
             ) {
                 NavTab.entries.forEach { tab ->
-                    val isSelected = selectedTab == tab
+                    val isSelected = selectedTab == tab && !isTripitakaVisible
                     val badgeCount = if (tab == NavTab.DOWNLOADS) activeDownloads.size else 0
                     val tabTitle = tab.getTitle(strings)
 
                     NavigationBarItem(
                         selected = isSelected,
-                        onClick = { selectedTab = tab },
+                        onClick = {
+                            selectedTab = tab
+                            isTripitakaVisible = false
+                        },
                         icon = {
                             BadgedBox(
                                 badge = {
@@ -256,9 +259,18 @@ fun MainAppScaffold(viewModel: MainViewModel) {
                         onDownloadSermon = { sermon -> viewModel.startDownload(sermon) },
                         onRefresh = { viewModel.loadHomeFeed() },
                         onOpenSettings = { showSettingsSheet = true },
-                        onNavigateToJethavanarama = { selectedTab = NavTab.JETHAVANARAMA },
-                        onNavigateToPahura = { selectedTab = NavTab.PAHURA },
-                        onNavigateToDhammapada = { selectedTab = NavTab.DHAMMAPADA },
+                        onNavigateToJethavanarama = {
+                            selectedTab = NavTab.JETHAVANARAMA
+                            isTripitakaVisible = false
+                        },
+                        onNavigateToPahura = {
+                            selectedTab = NavTab.PAHURA
+                            isTripitakaVisible = false
+                        },
+                        onNavigateToDhammapada = {
+                            selectedTab = NavTab.DHAMMAPADA
+                            isTripitakaVisible = false
+                        },
                         onOpenTripitaka = { isTripitakaVisible = true }
                     )
                 }

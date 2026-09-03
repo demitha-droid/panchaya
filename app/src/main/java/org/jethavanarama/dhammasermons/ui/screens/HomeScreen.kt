@@ -134,13 +134,13 @@ fun HomeScreen(
                                 ) {
                                     Icon(
                                         imageVector = Icons.AutoMirrored.Filled.MenuBook,
-                                        contentDescription = "ත්‍රිපිටකය",
+                                        contentDescription = str.tripitakaTitle,
                                         tint = SaffronPrimary,
                                         modifier = Modifier.size(18.dp)
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = "ත්‍රිපිටකය",
+                                        text = str.tripitakaTitle,
                                         style = MaterialTheme.typography.labelLarge.copy(
                                             fontWeight = FontWeight.Bold,
                                             color = TextPrimary
