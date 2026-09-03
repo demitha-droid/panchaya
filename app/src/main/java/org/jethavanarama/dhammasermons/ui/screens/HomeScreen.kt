@@ -11,7 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
@@ -55,7 +55,8 @@ fun HomeScreen(
     onOpenSettings: () -> Unit,
     onNavigateToJethavanarama: () -> Unit,
     onNavigateToPahura: () -> Unit,
-    onNavigateToDhammapada: () -> Unit = {}
+    onNavigateToDhammapada: () -> Unit = {},
+    onOpenTripitaka: () -> Unit = {}
 ) {
     val str = strings
     var searchQuery by remember { mutableStateOf("") }
@@ -111,7 +112,7 @@ fun HomeScreen(
                     Column(
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        // Top Row: Settings Button on the right
+                        // Top Row: ත්‍රිපිටකය Button and Settings Button on the right
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -119,6 +120,37 @@ fun HomeScreen(
                             horizontalArrangement = Arrangement.End,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            // ත්‍රිපිටකය (Tripitakaya) Button
+                            Surface(
+                                onClick = onOpenTripitaka,
+                                shape = RoundedCornerShape(20.dp),
+                                color = SurfaceCard,
+                                border = BorderStroke(1.dp, BorderDark),
+                                modifier = Modifier.height(40.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.MenuBook,
+                                        contentDescription = "ත්‍රිපිටකය",
+                                        tint = SaffronPrimary,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = "ත්‍රිපිටකය",
+                                        style = MaterialTheme.typography.labelLarge.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            color = TextPrimary
+                                        )
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
                             IconButton(
                                 onClick = onOpenSettings,
                                 modifier = Modifier
@@ -300,7 +332,7 @@ fun HomeScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Default.MenuBook,
+                                        imageVector = Icons.AutoMirrored.Filled.MenuBook,
                                         contentDescription = null,
                                         tint = SaffronPrimary,
                                         modifier = Modifier.size(24.dp)

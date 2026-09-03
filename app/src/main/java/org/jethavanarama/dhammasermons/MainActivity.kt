@@ -48,6 +48,7 @@ import org.jethavanarama.dhammasermons.ui.screens.HomeScreen
 import org.jethavanarama.dhammasermons.ui.screens.JethavanaramaScreen
 import org.jethavanarama.dhammasermons.ui.screens.PahuraScreen
 import org.jethavanarama.dhammasermons.ui.screens.ShortsScreen
+import org.jethavanarama.dhammasermons.ui.screens.TripitakaScreen
 import org.jethavanarama.dhammasermons.ui.theme.*
 import org.jethavanarama.dhammasermons.ui.viewmodel.MainViewModel
 
@@ -147,6 +148,7 @@ fun MainAppScaffold(viewModel: MainViewModel) {
     var selectedTab by remember { mutableStateOf(NavTab.HOME) }
     var isFullPlayerVisible by remember { mutableStateOf(false) }
     var showSettingsSheet by remember { mutableStateOf(false) }
+    var isTripitakaVisible by remember { mutableStateOf(false) }
 
     val homeSermons by viewModel.homeSermons.collectAsState()
     val jethavanaramaPaginated by viewModel.jethavanaramaPaginated.collectAsState()
@@ -173,6 +175,15 @@ fun MainAppScaffold(viewModel: MainViewModel) {
 
     val playerState by viewModel.playerState.collectAsState()
     val downloadStates by viewModel.downloadStates.collectAsState()
+
+    val tripitakaPitakas by viewModel.tripitakaPitakas.collectAsState()
+    val selectedPitaka by viewModel.selectedPitaka.collectAsState()
+    val selectedTripitakaBook by viewModel.selectedTripitakaBook.collectAsState()
+    val selectedTripitakaVagga by viewModel.selectedTripitakaVagga.collectAsState()
+    val tripitakaContent by viewModel.tripitakaContent.collectAsState()
+    val isTripitakaLoading by viewModel.isTripitakaLoading.collectAsState()
+    val tripitakaSearchQuery by viewModel.tripitakaSearchQuery.collectAsState()
+    val tripitakaSearchResults by viewModel.tripitakaSearchResults.collectAsState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -247,7 +258,8 @@ fun MainAppScaffold(viewModel: MainViewModel) {
                         onOpenSettings = { showSettingsSheet = true },
                         onNavigateToJethavanarama = { selectedTab = NavTab.JETHAVANARAMA },
                         onNavigateToPahura = { selectedTab = NavTab.PAHURA },
-                        onNavigateToDhammapada = { selectedTab = NavTab.DHAMMAPADA }
+                        onNavigateToDhammapada = { selectedTab = NavTab.DHAMMAPADA },
+                        onOpenTripitaka = { isTripitakaVisible = true }
                     )
                 }
                 NavTab.DHAMMAPADA -> {
@@ -325,6 +337,26 @@ fun MainAppScaffold(viewModel: MainViewModel) {
                         onRefresh = { viewModel.loadHomeFeed() }
                     )
                 }
+            }
+
+            // Tripitaka In-App Screen
+            if (isTripitakaVisible) {
+                TripitakaScreen(
+                    pitakas = tripitakaPitakas,
+                    selectedPitaka = selectedPitaka,
+                    selectedBook = selectedTripitakaBook,
+                    selectedVagga = selectedTripitakaVagga,
+                    content = tripitakaContent,
+                    isLoading = isTripitakaLoading,
+                    searchQuery = tripitakaSearchQuery,
+                    searchResults = tripitakaSearchResults,
+                    onSelectPitaka = { viewModel.selectPitaka(it) },
+                    onSelectBook = { viewModel.selectTripitakaBook(it) },
+                    onSelectVagga = { viewModel.selectTripitakaVagga(it) },
+                    onSearchQueryChange = { viewModel.setTripitakaSearchQuery(it) },
+                    onBack = { isTripitakaVisible = false },
+                    hasBottomMiniPlayer = playerState.currentSermon != null
+                )
             }
 
             // Floating Mini Player

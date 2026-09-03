@@ -24,7 +24,10 @@ import org.jethavanarama.dhammasermons.data.model.SermonCategory
 import org.jethavanarama.dhammasermons.data.model.Thero
 import org.jethavanarama.dhammasermons.data.model.DhammapadaKatha
 import org.jethavanarama.dhammasermons.data.model.DhammapadaVagga
+import org.jethavanarama.dhammasermons.data.model.TripitakaNode
+import org.jethavanarama.dhammasermons.data.model.TripitakaVaggaContent
 import org.jethavanarama.dhammasermons.data.repository.DhammapadaRepository
+import org.jethavanarama.dhammasermons.data.repository.TripitakaRepository
 import org.jethavanarama.dhammasermons.player.AudioPlayerManager
 import org.jethavanarama.dhammasermons.player.PlayerUiState
 import org.jethavanarama.dhammasermons.ui.i18n.AppLanguage
@@ -200,10 +203,88 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // Tripitaka State & Repository
+    val tripitakaRepo = TripitakaRepository(application)
+    private val _tripitakaPitakas = MutableStateFlow<List<TripitakaNode>>(emptyList())
+    val tripitakaPitakas: StateFlow<List<TripitakaNode>> = _tripitakaPitakas.asStateFlow()
+
+    private val _selectedPitaka = MutableStateFlow<TripitakaNode?>(null)
+    val selectedPitaka: StateFlow<TripitakaNode?> = _selectedPitaka.asStateFlow()
+
+    private val _selectedTripitakaBook = MutableStateFlow<TripitakaNode?>(null)
+    val selectedTripitakaBook: StateFlow<TripitakaNode?> = _selectedTripitakaBook.asStateFlow()
+
+    private val _selectedTripitakaVagga = MutableStateFlow<TripitakaNode?>(null)
+    val selectedTripitakaVagga: StateFlow<TripitakaNode?> = _selectedTripitakaVagga.asStateFlow()
+
+    private val _tripitakaContent = MutableStateFlow<TripitakaVaggaContent?>(null)
+    val tripitakaContent: StateFlow<TripitakaVaggaContent?> = _tripitakaContent.asStateFlow()
+
+    private val _isTripitakaLoading = MutableStateFlow(false)
+    val isTripitakaLoading: StateFlow<Boolean> = _isTripitakaLoading.asStateFlow()
+
+    private val _tripitakaSearchQuery = MutableStateFlow("")
+    val tripitakaSearchQuery: StateFlow<String> = _tripitakaSearchQuery.asStateFlow()
+
+    private val _tripitakaSearchResults = MutableStateFlow<List<TripitakaNode>>(emptyList())
+    val tripitakaSearchResults: StateFlow<List<TripitakaNode>> = _tripitakaSearchResults.asStateFlow()
+
+    fun loadTripitaka() {
+        if (_tripitakaPitakas.value.isNotEmpty()) return
+        viewModelScope.launch {
+            _isTripitakaLoading.value = true
+            val pitakas = tripitakaRepo.getPitakas()
+            _tripitakaPitakas.value = pitakas
+            if (pitakas.isNotEmpty() && _selectedPitaka.value == null) {
+                // Default to Sutta Pitaka (index 1) if available, else first
+                _selectedPitaka.value = if (pitakas.size > 1) pitakas[1] else pitakas.first()
+            }
+            _isTripitakaLoading.value = false
+        }
+    }
+
+    fun selectPitaka(pitaka: TripitakaNode?) {
+        _selectedPitaka.value = pitaka
+        _selectedTripitakaBook.value = null
+        _selectedTripitakaVagga.value = null
+        _tripitakaContent.value = null
+    }
+
+    fun selectTripitakaBook(book: TripitakaNode?) {
+        _selectedTripitakaBook.value = book
+        _selectedTripitakaVagga.value = null
+        _tripitakaContent.value = null
+    }
+
+    fun selectTripitakaVagga(vagga: TripitakaNode?) {
+        _selectedTripitakaVagga.value = vagga
+        _tripitakaContent.value = null
+        if (vagga != null) {
+            viewModelScope.launch {
+                _isTripitakaLoading.value = true
+                val result = tripitakaRepo.getVaggaContent(vagga)
+                _tripitakaContent.value = result.getOrNull()
+                _isTripitakaLoading.value = false
+            }
+        }
+    }
+
+    fun setTripitakaSearchQuery(query: String) {
+        _tripitakaSearchQuery.value = query
+        if (query.isBlank()) {
+            _tripitakaSearchResults.value = emptyList()
+        } else {
+            viewModelScope.launch {
+                _tripitakaSearchResults.value = tripitakaRepo.searchSuttas(query)
+            }
+        }
+    }
+
     init {
         playerManager.ensureServiceStarted()
         refreshAllFeeds(forceNetworkRefresh = false)
         loadDhammapada()
+        loadTripitaka()
         updateStorageUsage()
     }
 
