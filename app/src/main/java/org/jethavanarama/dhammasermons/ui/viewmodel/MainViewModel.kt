@@ -91,6 +91,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // Save downloads as public MP3 (Default: true)
+    private val _saveDownloadsAsMp3 = MutableStateFlow(
+        prefs.getBoolean("save_downloads_as_mp3", true)
+    )
+    val saveDownloadsAsMp3: StateFlow<Boolean> = _saveDownloadsAsMp3.asStateFlow()
+
+    fun setSaveDownloadsAsMp3(enabled: Boolean) {
+        _saveDownloadsAsMp3.value = enabled
+        prefs.edit().putBoolean("save_downloads_as_mp3", enabled).apply()
+    }
+
     private val jethavanaramaExtractor = JethavanaramaExtractor()
     private val pahuraExtractor = PahuraYouTubeExtractor()
 

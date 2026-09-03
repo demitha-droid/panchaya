@@ -34,6 +34,8 @@ fun SettingsSheet(
     onThemeModeSelect: (ThemeMode) -> Unit,
     currentLanguage: AppLanguage,
     onLanguageSelect: (AppLanguage) -> Unit,
+    saveDownloadsAsMp3: Boolean = true,
+    onSaveDownloadsAsMp3Toggle: (Boolean) -> Unit = {},
     onRefreshFeeds: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -251,6 +253,67 @@ fun SettingsSheet(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
+                    // Option 1: Save MP3 to Public Downloads Folder Toggle
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSaveDownloadsAsMp3Toggle(!saveDownloadsAsMp3) }
+                            .padding(vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(SaffronPrimary.copy(alpha = 0.15f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.CloudDownload,
+                                    contentDescription = null,
+                                    tint = SaffronPrimary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.padding(end = 8.dp)) {
+                                Text(
+                                    text = str.saveDownloadsAsMp3,
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                    color = TextPrimary
+                                )
+                                Text(
+                                    text = str.saveDownloadsAsMp3Sub,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextSecondary
+                                )
+                            }
+                        }
+
+                        Switch(
+                            checked = saveDownloadsAsMp3,
+                            onCheckedChange = onSaveDownloadsAsMp3Toggle,
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = SaffronPrimary,
+                                checkedTrackColor = SaffronPrimary.copy(alpha = 0.35f),
+                                uncheckedThumbColor = TextMuted,
+                                uncheckedTrackColor = SurfaceDark,
+                                uncheckedBorderColor = BorderDark
+                            )
+                        )
+                    }
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 10.dp),
+                        color = BorderDark.copy(alpha = 0.5f)
+                    )
+
+                    // Option 2: Force Refresh Catalogs
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()

@@ -281,7 +281,8 @@ fun MainAppScaffold(viewModel: MainViewModel) {
                         onDownloadSermon = { sermon -> viewModel.startDownload(sermon) },
                         onRefresh = { viewModel.refreshJethavanarama() },
                         onNextPage = { viewModel.nextJethavanaramaPage() },
-                        onPreviousPage = { viewModel.previousJethavanaramaPage() }
+                        onPreviousPage = { viewModel.previousJethavanaramaPage() },
+                        onOpenSettings = { showSettingsSheet = true }
                     )
                 }
                 NavTab.PAHURA -> {
@@ -361,11 +362,14 @@ fun MainAppScaffold(viewModel: MainViewModel) {
             if (showSettingsSheet) {
                 val currentThemeMode by viewModel.themeMode.collectAsState()
                 val currentLanguage by viewModel.appLanguage.collectAsState()
+                val saveDownloadsAsMp3 by viewModel.saveDownloadsAsMp3.collectAsState()
                 SettingsSheet(
                     currentThemeMode = currentThemeMode,
                     onThemeModeSelect = { viewModel.setThemeMode(it) },
                     currentLanguage = currentLanguage,
                     onLanguageSelect = { viewModel.setAppLanguage(it) },
+                    saveDownloadsAsMp3 = saveDownloadsAsMp3,
+                    onSaveDownloadsAsMp3Toggle = { viewModel.setSaveDownloadsAsMp3(it) },
                     onRefreshFeeds = { viewModel.refreshAllFeeds(forceNetworkRefresh = true) },
                     onDismiss = { showSettingsSheet = false }
                 )

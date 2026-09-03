@@ -233,8 +233,12 @@ class SermonDownloadManager(
                     return@launch
                 }
 
-                // 3. Save copy of the MP3 to the public system Downloads/DhammaSermons folder
-                saveToPublicDownloadsFolder(outputFile, resolvedSermon)
+                // 3. Save copy of the MP3 to the public system Downloads/DhammaSermons folder if enabled (default true)
+                val shouldSavePublicMp3 = context.getSharedPreferences("panchaya_settings", Context.MODE_PRIVATE)
+                    .getBoolean("save_downloads_as_mp3", true)
+                if (shouldSavePublicMp3) {
+                    saveToPublicDownloadsFolder(outputFile, resolvedSermon)
+                }
 
                 // 4. Mark as downloaded in Room DB
                 val updatedSermon = resolvedSermon.copy(

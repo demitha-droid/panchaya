@@ -1,6 +1,7 @@
 package org.jethavanarama.dhammasermons.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -10,11 +11,13 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -23,10 +26,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import org.jethavanarama.dhammasermons.R
 import org.jethavanarama.dhammasermons.data.model.*
 import org.jethavanarama.dhammasermons.ui.i18n.strings
 import org.jethavanarama.dhammasermons.player.PlayerUiState
@@ -54,7 +59,8 @@ fun JethavanaramaScreen(
     onDownloadSermon: (Sermon) -> Unit,
     onRefresh: () -> Unit,
     onNextPage: () -> Unit,
-    onPreviousPage: () -> Unit
+    onPreviousPage: () -> Unit,
+    onOpenSettings: () -> Unit = {}
 ) {
     val str = strings
     val sermons = paginatedSermons.sermons
@@ -90,41 +96,59 @@ fun JethavanaramaScreen(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = 120.dp)
         ) {
-            // Header
+            // Header: Dhamma Chakraya on the left tucked partially behind Filters Row, Settings on the right
             item {
-                Column(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 16.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    // Dhamma Chakraya resting on the left with bottom ~1/4 tucked behind the filters row
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_dhamma_chakra),
+                        contentDescription = "Dhamma Chakraya",
+                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(SaffronPrimary),
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(start = 20.dp, top = 4.dp)
+                            .size(68.dp),
+                        contentScale = ContentScale.Fit
+                    )
+
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Column {
-                            Text(
-                                text = str.jethavanaramaTitle,
-                                style = MaterialTheme.typography.headlineMedium.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = TextPrimary
+                        // Top Row: Settings Button on the right
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 6.dp),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            IconButton(
+                                onClick = onOpenSettings,
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(SurfaceCard)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Settings,
+                                    contentDescription = str.settingsTitle,
+                                    tint = SaffronPrimary,
+                                    modifier = Modifier.size(20.dp)
                                 )
-                            )
-                            Text(
-                                text = str.jethavanaramaSubtitle,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = TextSecondary
-                            )
+                            }
                         }
-                    }
 
-                    Spacer(modifier = Modifier.height(14.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                    // Filters Row (Theros & Language Dropdowns)
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
+                        // Filters Row (Theros & Language Dropdowns)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
                         // Thero Selector Dropdown
                         Box(modifier = Modifier.weight(1f)) {
                             Surface(
@@ -239,6 +263,7 @@ fun JethavanaramaScreen(
                     }
                 }
             }
+        }
 
             // Categories Filter Row
             item {
