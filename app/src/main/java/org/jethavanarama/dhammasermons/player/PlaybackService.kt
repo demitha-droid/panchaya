@@ -32,9 +32,17 @@ class PlaybackService : MediaSessionService() {
 
         const val ACTION_PLAY = "org.jethavanarama.dhammasermons.ACTION_PLAY"
         const val ACTION_PAUSE = "org.jethavanarama.dhammasermons.ACTION_PAUSE"
+        const val ACTION_REWIND_10 = "org.jethavanarama.dhammasermons.ACTION_REWIND_10"
+        const val ACTION_FORWARD_10 = "org.jethavanarama.dhammasermons.ACTION_FORWARD_10"
         const val ACTION_NEXT = "org.jethavanarama.dhammasermons.ACTION_NEXT"
         const val ACTION_PREV = "org.jethavanarama.dhammasermons.ACTION_PREV"
         const val ACTION_STOP = "org.jethavanarama.dhammasermons.ACTION_STOP"
+    }
+
+    private val playerListener = object : Player.Listener {
+        override fun onEvents(player: Player, events: Player.Events) {
+            updateNotification()
+        }
     }
 
     override fun onCreate() {
@@ -45,6 +53,8 @@ class PlaybackService : MediaSessionService() {
 
         // 2. Build MediaSession with pending activity intent
         val player = AudioPlayerManager.getInstance(applicationContext).player
+        player.addListener(playerListener)
+
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
@@ -90,6 +100,8 @@ class PlaybackService : MediaSessionService() {
                 }
             }
             ACTION_PAUSE -> player.pause()
+            ACTION_REWIND_10 -> playerManager.seekBack10()
+            ACTION_FORWARD_10 -> playerManager.seekForward10()
             ACTION_NEXT -> playerManager.playNext()
             ACTION_PREV -> playerManager.playPrevious()
             ACTION_STOP -> {
@@ -98,18 +110,21 @@ class PlaybackService : MediaSessionService() {
             }
         }
 
-        // Keep foreground notification updated
+        updateNotification()
+
+        return super.onStartCommand(intent, flags, startId)
+    }
+
+    fun updateNotification() {
         try {
-            if (mediaSession != null && customNotificationProvider != null) {
-                val notif = customNotificationProvider!!.buildNotification(mediaSession!!)
-                val notifManager = getSystemService(NotificationManager::class.java)
-                notifManager?.notify(NOTIFICATION_ID, notif)
-            }
+            val session = mediaSession ?: return
+            val provider = customNotificationProvider ?: return
+            val notif = provider.buildNotification(session)
+            val notifManager = getSystemService(NotificationManager::class.java)
+            notifManager?.notify(NOTIFICATION_ID, notif)
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
-        return super.onStartCommand(intent, flags, startId)
     }
 
     private fun createNotificationChannel() {
@@ -147,6 +162,11 @@ class PlaybackService : MediaSessionService() {
 
     override fun onDestroy() {
         try {
+            AudioPlayerManager.getInstance(applicationContext).player.removeListener(playerListener)
+        } catch (e: Exception) {
+            // Non-fatal
+        }
+        try {
             AudioPlayerManager.getInstance(applicationContext).saveCurrentPositionNow()
         } catch (e: Exception) {
             // Non-fatal
@@ -169,13 +189,15 @@ class CustomMediaNotificationProvider(private val context: Context) : MediaNotif
         val playerManager = AudioPlayerManager.getInstance(context)
         val curSermon = playerManager.uiState.value.currentSermon
 
+        val playbackSpeed = playerManager.uiState.value.playbackSpeed
+
         val title = metadata?.title?.toString()
             ?: curSermon?.title
             ?: "ධර්ම දේශනා (Dhamma Sermon)"
 
         val artist = metadata?.artist?.toString()
             ?: curSermon?.thero
-            ?: "ජෙතවනාරාමය & පහුර"
+            ?: "ජෙතවනාරාමය • ධර්ම දේශනා"
 
         val isPlaying = player.isPlaying
 
@@ -189,14 +211,14 @@ class CustomMediaNotificationProvider(private val context: Context) : MediaNotif
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        // Previous intent
-        val prevIntent = Intent(context, PlaybackService::class.java).apply {
-            action = PlaybackService.ACTION_PREV
+        // 10s Rewind intent
+        val rewindIntent = Intent(context, PlaybackService::class.java).apply {
+            action = PlaybackService.ACTION_REWIND_10
         }
-        val prevPendingIntent = PendingIntent.getService(
+        val rewindPendingIntent = PendingIntent.getService(
             context,
-            1,
-            prevIntent,
+            10,
+            rewindIntent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
@@ -211,22 +233,27 @@ class CustomMediaNotificationProvider(private val context: Context) : MediaNotif
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        // Next intent
-        val nextIntent = Intent(context, PlaybackService::class.java).apply {
-            action = PlaybackService.ACTION_NEXT
+        // 10s Forward intent
+        val forwardIntent = Intent(context, PlaybackService::class.java).apply {
+            action = PlaybackService.ACTION_FORWARD_10
         }
-        val nextPendingIntent = PendingIntent.getService(
+        val forwardPendingIntent = PendingIntent.getService(
             context,
-            3,
-            nextIntent,
+            11,
+            forwardIntent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
+
+        // Concept 1 (Sermon Pro) speed and status subtext badge
+        val speedStr = if (playbackSpeed != 1.0f) "${playbackSpeed}x" else "1.0x"
+        val subText = "$speedStr • ධර්ම ශ්‍රවණය"
 
         val builder = NotificationCompat.Builder(context, PlaybackService.NOTIFICATION_CHANNEL_ID)
             .setContentTitle(title)
             .setContentText(artist)
+            .setSubText(subText)
             .setSmallIcon(R.drawable.ic_dhamma_chakra)
-            .setColor(0xFFFF9800.toInt())
+            .setColor(0xFFFF9800.toInt()) // Monastic warm saffron accent
             .setContentIntent(openAppPendingIntent)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setOngoing(isPlaying)
@@ -251,7 +278,8 @@ class CustomMediaNotificationProvider(private val context: Context) : MediaNotif
 
         if (!hasLargeIcon) {
             try {
-                val defaultBitmap = BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher)
+                val defaultBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.home_header_icon)
+                    ?: BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher)
                 if (defaultBitmap != null) {
                     builder.setLargeIcon(defaultBitmap)
                 }
@@ -260,16 +288,16 @@ class CustomMediaNotificationProvider(private val context: Context) : MediaNotif
             }
         }
 
-        // Add Previous, Play/Pause, Next actions
-        builder.addAction(android.R.drawable.ic_media_previous, "Previous", prevPendingIntent)
+        // Concept 1 (Sermon Pro): 10s Back | Play/Pause | 10s Forward
+        builder.addAction(R.drawable.ic_replay_10, "10s Back", rewindPendingIntent)
         builder.addAction(
-            if (isPlaying) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play,
+            if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play,
             if (isPlaying) "Pause" else "Play",
             playPausePendingIntent
         )
-        builder.addAction(android.R.drawable.ic_media_next, "Next", nextPendingIntent)
+        builder.addAction(R.drawable.ic_forward_10, "10s Forward", forwardPendingIntent)
 
-        // Apply MediaStyle to render the rich mini player on Lock Screen and Notification Shade
+        // Apply MediaStyle to render the rich Sermon Pro mini player on Lock Screen & Notification Shade
         val mediaStyle = androidx.media.app.NotificationCompat.MediaStyle()
             .setShowActionsInCompactView(0, 1, 2)
         builder.setStyle(mediaStyle)
@@ -291,5 +319,18 @@ class CustomMediaNotificationProvider(private val context: Context) : MediaNotif
         session: MediaSession,
         action: String,
         extras: android.os.Bundle
-    ): Boolean = false
+    ): Boolean {
+        val playerManager = AudioPlayerManager.getInstance(context)
+        return when (action) {
+            PlaybackService.ACTION_REWIND_10 -> {
+                playerManager.seekBack10()
+                true
+            }
+            PlaybackService.ACTION_FORWARD_10 -> {
+                playerManager.seekForward10()
+                true
+            }
+            else -> false
+        }
+    }
 }

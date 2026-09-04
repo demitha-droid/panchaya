@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Forward10
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Replay10
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -47,6 +48,7 @@ import kotlin.math.roundToInt
 fun MiniPlayer(
     playerState: PlayerUiState,
     onPlayPauseClick: () -> Unit,
+    onSeekBack: () -> Unit = {},
     onSeekForward: () -> Unit,
     onDismiss: () -> Unit,
     onClick: () -> Unit,
@@ -204,22 +206,22 @@ fun MiniPlayer(
                             )
                         }
 
-                        // Forward 10s
+                        // 10s Rewind
                         IconButton(
-                            onClick = onSeekForward,
-                            modifier = Modifier.size(36.dp)
+                            onClick = onSeekBack,
+                            modifier = Modifier.size(34.dp)
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Forward10,
-                                contentDescription = "Forward 10s",
+                                imageVector = Icons.Default.Replay10,
+                                contentDescription = "Rewind 10s",
                                 tint = TextSecondary,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
 
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(2.dp))
 
-                        // Play / Pause Terracotta Dial
+                        // Play / Pause Saffron Dial
                         IconButton(
                             onClick = onPlayPauseClick,
                             modifier = Modifier
@@ -241,6 +243,21 @@ fun MiniPlayer(
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
+                        }
+
+                        Spacer(modifier = Modifier.width(2.dp))
+
+                        // 10s Forward
+                        IconButton(
+                            onClick = onSeekForward,
+                            modifier = Modifier.size(34.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Forward10,
+                                contentDescription = "Forward 10s",
+                                tint = TextSecondary,
+                                modifier = Modifier.size(20.dp)
+                            )
                         }
                     }
                 }

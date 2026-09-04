@@ -376,6 +376,7 @@ fun MainAppScaffold(viewModel: MainViewModel) {
                 MiniPlayer(
                     playerState = playerState,
                     onPlayPauseClick = { viewModel.togglePlayPause() },
+                    onSeekBack = { viewModel.seekRelative(-10000L) },
                     onSeekForward = { viewModel.seekRelative(10000L) },
                     onDismiss = { viewModel.dismissMiniPlayer() },
                     onClick = { isFullPlayerVisible = true },

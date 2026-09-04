@@ -66,6 +66,8 @@ class AudioPlayerManager private constructor(private val context: Context) {
         .setAudioAttributes(audioAttributes, true)
         .setHandleAudioBecomingNoisy(true)
         .setWakeMode(C.WAKE_MODE_NETWORK)
+        .setSeekBackIncrementMs(10_000L)
+        .setSeekForwardIncrementMs(10_000L)
         .build().apply {
             addListener(object : Player.Listener {
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -367,6 +369,14 @@ class AudioPlayerManager private constructor(private val context: Context) {
         player.seekTo(target)
         _uiState.value = _uiState.value.copy(currentPositionMs = target)
         saveCurrentPositionNow()
+    }
+
+    fun seekBack10() {
+        seekRelative(-10_000L)
+    }
+
+    fun seekForward10() {
+        seekRelative(10_000L)
     }
 
     fun setPlaybackSpeed(speed: Float) {
