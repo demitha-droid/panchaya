@@ -60,7 +60,8 @@ fun JethavanaramaScreen(
     onRefresh: () -> Unit,
     onNextPage: () -> Unit,
     onPreviousPage: () -> Unit,
-    onOpenSettings: () -> Unit = {}
+    onOpenSettings: () -> Unit = {},
+    onAddToPlaylistClick: ((Sermon) -> Unit)? = null
 ) {
     val str = strings
     val sermons = paginatedSermons.sermons
@@ -377,6 +378,7 @@ fun JethavanaramaScreen(
                     downloadState = dlState,
                     onPlayClick = { onPlaySermon(sermon, paginatedSermons.sermons) },
                     onDownloadClick = { onDownloadSermon(sermon) },
+                    onAddToPlaylistClick = onAddToPlaylistClick?.let { { it(sermon) } },
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
                 )
             }

@@ -96,13 +96,64 @@ data class AppStrings(
     val appDescription: String,
     val githubRepo: String,
 
-    // Resume Reminder Alarm
     val resumeReminderTitle: String,
     val resumeReminderSubtitle: String,
     val resumeButton: String,
     val remindIn6Hours: String,
     val stopAlarm: String,
-    val listeningProgress: String
+    val listeningProgress: String,
+
+    // Playlists
+    val playlists: String = "Playlists",
+    val createPlaylist: String = "Create Playlist",
+    val newPlaylist: String = "New Playlist",
+    val playlistName: String = "Playlist Name",
+    val editPlaylist: String = "Edit Playlist",
+    val deletePlaylist: String = "Delete Playlist",
+    val addToPlaylist: String = "Add to Playlist",
+    val addedToPlaylist: String = "Added to playlist",
+    val removedFromPlaylist: String = "Removed from playlist",
+    val emptyPlaylist: String = "No sermons in this playlist",
+    val playAll: String = "Play All",
+    val shuffle: String = "Shuffle",
+    val tracksLabel: String = "Sermons",
+    val save: String = "Save",
+
+    // Default starter playlist names & descriptions
+    val defaultPlaylistMeditation: String = "Meditation Programs",
+    val defaultPlaylistMeditationDesc: String = "Daily meditation and calming sermons",
+    val defaultPlaylistGreatSermons: String = "Great Sermons",
+    val defaultPlaylistGreatSermonsDesc: String = "Profound sermons by the Thero",
+    val defaultPlaylistDailyListening: String = "Daily Listening",
+    val defaultPlaylistDailyListeningDesc: String = "Sermons for daily reflection and mindfulness",
+
+    // Playlist UI strings
+    val noPlaylistsCreated: String = "No playlists created yet",
+    val noPlaylistsSubtitle: String = "Add your favorite sermons to create your own playlists.",
+    val playlistCollectionTag: String = "Dhamma Sermons Collection",
+    val playlistFallbackDesc: String = "Dhamma Playlist",
+    val playlistsSeriesTitle: String = "Dhamma Playlists",
+    val playlistNamePlaceholder: String = "e.g. Playlist 1",
+    val playlistDescriptionLabel: String = "Description (Optional)",
+    val coverIconLabel: String = "Cover Icon",
+    val themeAccentLabel: String = "Theme Accent Color",
+    val deletePlaylistConfirm: String = "Are you sure you want to delete this playlist?",
+    val emptyPlaylistHint: String = "Select a sermon from Home or Sermons and tap 'Add to Playlist'",
+    val sermonListLabel: String = "Sermons in Playlist",
+    val hoursLabel: String = "hours",
+    val minutesLabel: String = "mins",
+    val done: String = "Done",
+    val viewAll: String = "View All",
+
+    // Active downloads & Download manager
+    val activeDownloadsLabel: String = "Downloading",
+    val downloadedSermonsLabel: String = "Downloaded Sermons",
+    val searchResultsLabel: String = "Search Results",
+    val noDownloadsHint: String = "Tap the Download button on any sermon to listen offline.",
+    val downloadingProgress: String = "Downloading...",
+    val downloadFailed: String = "Failed",
+    val deleteConfirmTitle: String = "Delete Sermon?",
+    val deleteConfirmMessage: String = "Are you sure you want to remove this sermon from device storage to free up space?"
 )
 
 val SinhalaStrings = AppStrings(
@@ -193,7 +244,55 @@ val SinhalaStrings = AppStrings(
     resumeButton = "නැවත අරඹන්න",
     remindIn6Hours = "පැය 6කින් නැවත මතක් කරන්න",
     stopAlarm = "මතක් කිරීම නවත්වන්න",
-    listeningProgress = "සවන් දුන් කාලය"
+    listeningProgress = "සවන් දුන් කාලය",
+
+    playlists = "ධර්ම ලැයිස්තු",
+    createPlaylist = "නව ලැයිස්තුවක්",
+    newPlaylist = "නව ධර්ම ලැයිස්තුව",
+    playlistName = "ලැයිස්තුවේ නම",
+    editPlaylist = "ලැයිස්තුව සංස්කරණය",
+    deletePlaylist = "ලැයිස්තුව මකන්න",
+    addToPlaylist = "ලැයිස්තුවට එක් කරන්න",
+    addedToPlaylist = "ලැයිස්තුවට එක් කරන ලදී",
+    removedFromPlaylist = "ලැයිස්තුවෙන් ඉවත් කරන ලදී",
+    emptyPlaylist = "මෙම ලැයිස්තුවේ දේශනා නොමැත",
+    playAll = "සියල්ල වාදනය",
+    shuffle = "කලවම් කර වාදනය",
+    tracksLabel = "දේශනා",
+    save = "සුරකින්න",
+
+    defaultPlaylistMeditation = "භාවනා වැඩසටහන්",
+    defaultPlaylistMeditationDesc = "දිනපතා භාවනා හා සිත සන්සුන් කරන දේශනා",
+    defaultPlaylistGreatSermons = "මහා දේශනා",
+    defaultPlaylistGreatSermonsDesc = "ගුරු ස්වාමීන් වහන්සේගේ මහා දේශනාවන්",
+    defaultPlaylistDailyListening = "දිනපතා ශ්‍රවණයට",
+    defaultPlaylistDailyListeningDesc = "නිරන්තරයෙන් මෙනෙහි කිරීමට සුදුසු දේශනා",
+
+    noPlaylistsCreated = "තවමත් ධර්ම ලැයිස්තු සාදා නැත",
+    noPlaylistsSubtitle = "ඔබ කැමති දේශනා එක් කර ඔබේම ධර්ම ලැයිස්තු සාදා ගන්න.",
+    playlistCollectionTag = "ධර්ම දේශනා ගබඩාව",
+    playlistFallbackDesc = "ධර්ම ලැයිස්තුව",
+    playlistsSeriesTitle = "ධර්ම එකතු මාලාව",
+    playlistNamePlaceholder = "උදා: Playlist 1",
+    playlistDescriptionLabel = "විස්තරය (විකල්ප)",
+    coverIconLabel = "ආවරණ සංකේතය",
+    themeAccentLabel = "තේමා වර්ණය",
+    deletePlaylistConfirm = "ඔබට මෙම ධර්ම ලැයිස්තුව මැකීමට අවශ්‍ය බව සහතිකද?",
+    emptyPlaylistHint = "මුල් පිටුවෙන් හෝ දේශනා ලැයිස්තුවලින් දේශනාවක් තෝරා 'ලැයිස්තුවට එක් කරන්න' තට්ටු කරන්න.",
+    sermonListLabel = "ධර්ම දේශනා ලැයිස්තුව",
+    hoursLabel = "පැය",
+    minutesLabel = "විනාඩි",
+    done = "සම්පූර්ණයි",
+    viewAll = "බලන්න",
+
+    activeDownloadsLabel = "බාගත වෙමින් පවතින",
+    downloadedSermonsLabel = "බාගත කළ දේශනා",
+    searchResultsLabel = "සෙවුම් ප්‍රතිඵල",
+    noDownloadsHint = "ඕනෑම දේශනාවක Download බොත්තම ඔබා Offline ඇසීමට බාගත කරගන්න.",
+    downloadingProgress = "බාගත වෙමින් පවතී...",
+    downloadFailed = "අසාර්ථක විය",
+    deleteConfirmTitle = "දේශනාව ඉවත් කරන්නද?",
+    deleteConfirmMessage = "ඔබගේ දුරකථනයෙන් ඉවත් කර ඉඩ නිදහස් කිරීමට අවශ්‍යද?"
 )
 
 val EnglishStrings = AppStrings(
@@ -284,7 +383,55 @@ val EnglishStrings = AppStrings(
     resumeButton = "Resume Listening",
     remindIn6Hours = "Remind in 6 Hours",
     stopAlarm = "Stop Reminder",
-    listeningProgress = "Listening Progress"
+    listeningProgress = "Listening Progress",
+
+    playlists = "Playlists",
+    createPlaylist = "Create Playlist",
+    newPlaylist = "New Playlist",
+    playlistName = "Playlist Name",
+    editPlaylist = "Edit Playlist",
+    deletePlaylist = "Delete Playlist",
+    addToPlaylist = "Add to Playlist",
+    addedToPlaylist = "Added to playlist",
+    removedFromPlaylist = "Removed from playlist",
+    emptyPlaylist = "No sermons in this playlist",
+    playAll = "Play All",
+    shuffle = "Shuffle",
+    tracksLabel = "Sermons",
+    save = "Save",
+
+    defaultPlaylistMeditation = "Meditation Programs",
+    defaultPlaylistMeditationDesc = "Daily meditation and calming sermons",
+    defaultPlaylistGreatSermons = "Great Sermons",
+    defaultPlaylistGreatSermonsDesc = "Profound sermons by the Thero",
+    defaultPlaylistDailyListening = "Daily Listening",
+    defaultPlaylistDailyListeningDesc = "Sermons for daily reflection and mindfulness",
+
+    noPlaylistsCreated = "No playlists created yet",
+    noPlaylistsSubtitle = "Add your favorite sermons to create your own playlists.",
+    playlistCollectionTag = "Dhamma Sermons Collection",
+    playlistFallbackDesc = "Dhamma Playlist",
+    playlistsSeriesTitle = "Dhamma Playlists",
+    playlistNamePlaceholder = "e.g. Playlist 1",
+    playlistDescriptionLabel = "Description (Optional)",
+    coverIconLabel = "Cover Icon",
+    themeAccentLabel = "Theme Accent Color",
+    deletePlaylistConfirm = "Are you sure you want to delete this playlist?",
+    emptyPlaylistHint = "Select a sermon from Home or Sermons and tap 'Add to Playlist'",
+    sermonListLabel = "Sermons in Playlist",
+    hoursLabel = "hours",
+    minutesLabel = "mins",
+    done = "Done",
+    viewAll = "View All",
+
+    activeDownloadsLabel = "Downloading",
+    downloadedSermonsLabel = "Downloaded Sermons",
+    searchResultsLabel = "Search Results",
+    noDownloadsHint = "Tap the Download button on any sermon to listen offline.",
+    downloadingProgress = "Downloading...",
+    downloadFailed = "Failed",
+    deleteConfirmTitle = "Delete Download?",
+    deleteConfirmMessage = "Are you sure you want to remove this sermon from device storage to free up space?"
 )
 
 val GermanStrings = AppStrings(

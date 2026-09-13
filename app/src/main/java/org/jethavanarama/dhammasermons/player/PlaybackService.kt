@@ -262,26 +262,12 @@ class CustomMediaNotificationProvider(private val context: Context) : MediaNotif
             .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
             .setPriority(NotificationCompat.PRIORITY_LOW)
 
-        // Large icon artwork
-        var hasLargeIcon = false
+        // Large icon artwork: Only set when sermon artwork data is present; keep completely empty otherwise
         metadata?.artworkData?.let { bytes ->
             try {
                 val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                 if (bitmap != null) {
                     builder.setLargeIcon(bitmap)
-                    hasLargeIcon = true
-                }
-            } catch (e: Exception) {
-                // Non-fatal
-            }
-        }
-
-        if (!hasLargeIcon) {
-            try {
-                val defaultBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.home_header_icon)
-                    ?: BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher)
-                if (defaultBitmap != null) {
-                    builder.setLargeIcon(defaultBitmap)
                 }
             } catch (e: Exception) {
                 // Non-fatal

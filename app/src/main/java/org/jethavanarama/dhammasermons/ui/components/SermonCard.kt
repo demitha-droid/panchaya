@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.Subscriptions
 import androidx.compose.material3.*
@@ -24,11 +25,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import org.jethavanarama.dhammasermons.R
 import org.jethavanarama.dhammasermons.data.model.DownloadState
 import org.jethavanarama.dhammasermons.data.model.Sermon
 import org.jethavanarama.dhammasermons.data.model.SermonSource
@@ -42,6 +45,7 @@ fun SermonCard(
     downloadState: DownloadState,
     onPlayClick: () -> Unit,
     onDownloadClick: () -> Unit,
+    onAddToPlaylistClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val cardBorder = if (isCurrent) {
@@ -98,7 +102,9 @@ fun SermonCard(
                         model = sermon.thumbnailUrl,
                         contentDescription = sermon.title,
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Crop,
+                        error = painterResource(id = R.drawable.home_header_icon),
+                        fallback = painterResource(id = R.drawable.home_header_icon)
                     )
                 }
 
@@ -208,10 +214,31 @@ fun SermonCard(
                 )
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(6.dp))
 
-            // Download Action Button
-            Box(contentAlignment = Alignment.Center) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                if (onAddToPlaylistClick != null) {
+                    IconButton(
+                        onClick = onAddToPlaylistClick,
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(CircleShape)
+                            .background(SurfaceDark)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PlaylistAdd,
+                            contentDescription = "Add to Playlist",
+                            tint = TextSecondary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+
+                // Download Action Button
+                Box(contentAlignment = Alignment.Center) {
                 when (downloadState) {
                     is DownloadState.Downloading -> {
                         if (downloadState.progress > 0f) {
@@ -263,4 +290,5 @@ fun SermonCard(
             }
         }
     }
+}
 }

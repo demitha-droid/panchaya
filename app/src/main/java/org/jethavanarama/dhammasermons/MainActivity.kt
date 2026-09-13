@@ -32,8 +32,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.activity.compose.BackHandler
 import androidx.media3.common.util.UnstableApi
+import org.jethavanarama.dhammasermons.data.db.PlaylistEntity
 import org.jethavanarama.dhammasermons.data.model.DownloadState
+import org.jethavanarama.dhammasermons.data.model.Sermon
+import org.jethavanarama.dhammasermons.ui.components.AddToPlaylistSheet
+import org.jethavanarama.dhammasermons.ui.components.EditPlaylistSheet
 import org.jethavanarama.dhammasermons.ui.components.FullPlayerSheet
 import org.jethavanarama.dhammasermons.ui.components.MiniPlayer
 import org.jethavanarama.dhammasermons.ui.components.SettingsSheet
@@ -47,6 +52,8 @@ import org.jethavanarama.dhammasermons.ui.screens.DownloadsScreen
 import org.jethavanarama.dhammasermons.ui.screens.HomeScreen
 import org.jethavanarama.dhammasermons.ui.screens.JethavanaramaScreen
 import org.jethavanarama.dhammasermons.ui.screens.PahuraScreen
+import org.jethavanarama.dhammasermons.ui.screens.PlaylistsScreen
+import org.jethavanarama.dhammasermons.ui.screens.PlaylistDetailScreen
 import org.jethavanarama.dhammasermons.ui.screens.ShortsScreen
 import org.jethavanarama.dhammasermons.ui.screens.TripitakaScreen
 import org.jethavanarama.dhammasermons.ui.theme.*
@@ -149,6 +156,11 @@ fun MainAppScaffold(viewModel: MainViewModel) {
     var isFullPlayerVisible by remember { mutableStateOf(false) }
     var showSettingsSheet by remember { mutableStateOf(false) }
     var isTripitakaVisible by remember { mutableStateOf(false) }
+    var isPlaylistsVisible by remember { mutableStateOf(false) }
+    var selectedPlaylist by remember { mutableStateOf<PlaylistEntity?>(null) }
+    var sermonForAddToPlaylist by remember { mutableStateOf<Sermon?>(null) }
+    var playlistToEdit by remember { mutableStateOf<PlaylistEntity?>(null) }
+    var showNewPlaylistSheet by remember { mutableStateOf(false) }
 
     val homeSermons by viewModel.homeSermons.collectAsState()
     val jethavanaramaPaginated by viewModel.jethavanaramaPaginated.collectAsState()
@@ -157,6 +169,7 @@ fun MainAppScaffold(viewModel: MainViewModel) {
     val downloadedSermons by viewModel.downloadedSermons.collectAsState()
     val activeDownloads by viewModel.activeDownloads.collectAsState()
     val storageUsedBytes by viewModel.storageUsedBytes.collectAsState()
+    val playlists by viewModel.playlists.collectAsState()
 
     val isHomeLoading by viewModel.isHomeLoading.collectAsState()
     val isJethavanaramaLoading by viewModel.isJethavanaramaLoading.collectAsState()
@@ -194,7 +207,7 @@ fun MainAppScaffold(viewModel: MainViewModel) {
                 tonalElevation = 4.dp
             ) {
                 NavTab.entries.forEach { tab ->
-                    val isSelected = selectedTab == tab && !isTripitakaVisible
+                    val isSelected = selectedTab == tab && !isTripitakaVisible && !isPlaylistsVisible && selectedPlaylist == null
                     val badgeCount = if (tab == NavTab.DOWNLOADS) activeDownloads.size else 0
                     val tabTitle = tab.getTitle(strings)
 
@@ -203,6 +216,8 @@ fun MainAppScaffold(viewModel: MainViewModel) {
                         onClick = {
                             selectedTab = tab
                             isTripitakaVisible = false
+                            isPlaylistsVisible = false
+                            selectedPlaylist = null
                         },
                         icon = {
                             BadgedBox(
@@ -255,6 +270,7 @@ fun MainAppScaffold(viewModel: MainViewModel) {
                         isLoading = isHomeLoading,
                         playerState = playerState,
                         downloadStates = downloadStates,
+                        playlists = playlists,
                         onPlaySermon = { sermon, queue -> viewModel.playSermon(sermon, queue) },
                         onDownloadSermon = { sermon -> viewModel.startDownload(sermon) },
                         onRefresh = { viewModel.loadHomeFeed() },
@@ -262,16 +278,25 @@ fun MainAppScaffold(viewModel: MainViewModel) {
                         onNavigateToJethavanarama = {
                             selectedTab = NavTab.JETHAVANARAMA
                             isTripitakaVisible = false
+                            isPlaylistsVisible = false
+                            selectedPlaylist = null
                         },
                         onNavigateToPahura = {
                             selectedTab = NavTab.PAHURA
                             isTripitakaVisible = false
+                            isPlaylistsVisible = false
+                            selectedPlaylist = null
                         },
                         onNavigateToDhammapada = {
                             selectedTab = NavTab.DHAMMAPADA
                             isTripitakaVisible = false
+                            isPlaylistsVisible = false
+                            selectedPlaylist = null
                         },
-                        onOpenTripitaka = { isTripitakaVisible = true }
+                        onOpenTripitaka = { isTripitakaVisible = true },
+                        onOpenPlaylists = { isPlaylistsVisible = true },
+                        onSelectPlaylist = { playlist -> selectedPlaylist = playlist },
+                        onAddToPlaylistClick = { sermon -> sermonForAddToPlaylist = sermon }
                     )
                 }
                 NavTab.DHAMMAPADA -> {
@@ -306,7 +331,8 @@ fun MainAppScaffold(viewModel: MainViewModel) {
                         onRefresh = { viewModel.refreshJethavanarama() },
                         onNextPage = { viewModel.nextJethavanaramaPage() },
                         onPreviousPage = { viewModel.previousJethavanaramaPage() },
-                        onOpenSettings = { showSettingsSheet = true }
+                        onOpenSettings = { showSettingsSheet = true },
+                        onAddToPlaylistClick = { sermon -> sermonForAddToPlaylist = sermon }
                     )
                 }
                 NavTab.PAHURA -> {
@@ -319,7 +345,8 @@ fun MainAppScaffold(viewModel: MainViewModel) {
                         onDownloadSermon = { sermon -> viewModel.startDownload(sermon) },
                         onRefresh = { viewModel.refreshPahura() },
                         onNextPage = { viewModel.nextPahuraPage() },
-                        onPreviousPage = { viewModel.previousPahuraPage() }
+                        onPreviousPage = { viewModel.previousPahuraPage() },
+                        onAddToPlaylistClick = { sermon -> sermonForAddToPlaylist = sermon }
                     )
                 }
                 NavTab.SHORTS -> {
@@ -342,17 +369,25 @@ fun MainAppScaffold(viewModel: MainViewModel) {
                         storageUsedBytes = storageUsedBytes,
                         playerState = playerState,
                         downloadStates = downloadStates,
+                        playlists = playlists,
                         onPlaySermon = { sermon, queue -> viewModel.playSermon(sermon, queue) },
                         onDeleteDownload = { sermon -> viewModel.deleteDownload(sermon) },
                         onCancelDownload = { id -> viewModel.cancelDownload(id) },
                         onRetryDownload = { sermon -> viewModel.resumeDownload(sermon) },
-                        onRefresh = { viewModel.loadHomeFeed() }
+                        onRefresh = { viewModel.loadHomeFeed() },
+                        onSelectPlaylist = { playlist -> selectedPlaylist = playlist },
+                        onCreatePlaylistClick = { showNewPlaylistSheet = true },
+                        onEditPlaylistClick = { playlist -> playlistToEdit = playlist },
+                        onDeletePlaylistClick = { playlist -> viewModel.deletePlaylist(playlist.id) },
+                        onPlayPlaylistClick = { playlist -> viewModel.playPlaylist(playlist.id) },
+                        onAddToPlaylistClick = { sermon -> sermonForAddToPlaylist = sermon }
                     )
                 }
             }
 
             // Tripitaka In-App Screen
             if (isTripitakaVisible) {
+                BackHandler { isTripitakaVisible = false }
                 TripitakaScreen(
                     pitakas = tripitakaPitakas,
                     selectedPitaka = selectedPitaka,
@@ -367,6 +402,54 @@ fun MainAppScaffold(viewModel: MainViewModel) {
                     onSelectVagga = { viewModel.selectTripitakaVagga(it) },
                     onSearchQueryChange = { viewModel.setTripitakaSearchQuery(it) },
                     onBack = { isTripitakaVisible = false },
+                    hasBottomMiniPlayer = playerState.currentSermon != null
+                )
+            }
+
+            // Playlists Standalone Screen (Bento Grid)
+            if (isPlaylistsVisible) {
+                BackHandler { isPlaylistsVisible = false }
+                PlaylistsScreen(
+                    playlists = playlists,
+                    onSelectPlaylist = { playlist -> selectedPlaylist = playlist },
+                    onCreatePlaylistClick = { showNewPlaylistSheet = true },
+                    onEditPlaylistClick = { playlist -> playlistToEdit = playlist },
+                    onDeletePlaylistClick = { playlist -> viewModel.deletePlaylist(playlist.id) },
+                    onPlayPlaylistClick = { playlist -> viewModel.playPlaylist(playlist.id) },
+                    onBack = { isPlaylistsVisible = false },
+                    hasBottomMiniPlayer = playerState.currentSermon != null
+                )
+            }
+
+            // Playlist Detail Screen
+            if (selectedPlaylist != null) {
+                val currentPlaylist = playlists.firstOrNull { it.id == selectedPlaylist!!.id } ?: selectedPlaylist!!
+                val playlistSermons by viewModel.getSermonsForPlaylist(currentPlaylist.id).collectAsState(initial = emptyList())
+                BackHandler { selectedPlaylist = null }
+                PlaylistDetailScreen(
+                    playlist = currentPlaylist,
+                    sermons = playlistSermons,
+                    playerState = playerState,
+                    onBack = { selectedPlaylist = null },
+                    onPlaySermon = { sermon, queue -> viewModel.playSermon(sermon, queue) },
+                    onPlayAll = { viewModel.playPlaylist(currentPlaylist.id, shuffle = false) },
+                    onShuffle = { viewModel.playPlaylist(currentPlaylist.id, shuffle = true) },
+                    onEditPlaylist = { playlistToEdit = currentPlaylist },
+                    onDeletePlaylist = {
+                        viewModel.deletePlaylist(currentPlaylist.id)
+                        selectedPlaylist = null
+                    },
+                    onRemoveSermon = { sermon ->
+                        viewModel.removeSermonFromPlaylist(currentPlaylist.id, sermon.id)
+                    },
+                    onMoveSermon = { fromIndex, toIndex ->
+                        val list = playlistSermons.toMutableList()
+                        if (fromIndex in list.indices && toIndex in list.indices) {
+                            val item = list.removeAt(fromIndex)
+                            list.add(toIndex, item)
+                            viewModel.reorderSermonsInPlaylist(currentPlaylist.id, list.map { it.id })
+                        }
+                    },
                     hasBottomMiniPlayer = playerState.currentSermon != null
                 )
             }
@@ -399,7 +482,65 @@ fun MainAppScaffold(viewModel: MainViewModel) {
                     onPrevious = { viewModel.playPrevious() },
                     onSpeedChange = { speed -> viewModel.setPlaybackSpeed(speed) },
                     onSleepTimerSet = { mins -> viewModel.setSleepTimer(mins) },
-                    onDownloadClick = { viewModel.startDownload(curSermon) }
+                    onDownloadClick = { viewModel.startDownload(curSermon) },
+                    onAddToPlaylistClick = { sermonForAddToPlaylist = curSermon }
+                )
+            }
+
+            // Add To Playlist Modal Bottom Sheet
+            if (sermonForAddToPlaylist != null) {
+                val targetSermon = sermonForAddToPlaylist!!
+                val containingIds by viewModel.getPlaylistsContainingSermon(targetSermon.id).collectAsState(initial = emptyList())
+
+                AddToPlaylistSheet(
+                    sermon = targetSermon,
+                    playlists = playlists,
+                    containingPlaylistIds = containingIds.toSet(),
+                    onDismiss = { sermonForAddToPlaylist = null },
+                    onTogglePlaylist = { playlist, isCurrentlyIn ->
+                        viewModel.toggleSermonInPlaylist(playlist.id, targetSermon, isCurrentlyIn)
+                    },
+                    onCreateNewPlaylistClick = {
+                        showNewPlaylistSheet = true
+                    }
+                )
+            }
+
+            // Create / Edit Playlist Modal Bottom Sheet
+            if (showNewPlaylistSheet || playlistToEdit != null) {
+                val editingPlaylist = playlistToEdit
+                EditPlaylistSheet(
+                    playlist = editingPlaylist,
+                    onDismiss = {
+                        showNewPlaylistSheet = false
+                        playlistToEdit = null
+                    },
+                    onSave = { name, desc, icon, color ->
+                        if (editingPlaylist != null) {
+                            viewModel.updatePlaylist(
+                                editingPlaylist.copy(
+                                    name = name,
+                                    description = desc,
+                                    iconName = icon,
+                                    colorAccentHex = color,
+                                    updatedAt = System.currentTimeMillis()
+                                )
+                            )
+                        } else {
+                            viewModel.createPlaylist(name, desc, icon, color)
+                        }
+                        showNewPlaylistSheet = false
+                        playlistToEdit = null
+                    },
+                    onDelete = editingPlaylist?.let { ep ->
+                        {
+                            viewModel.deletePlaylist(ep.id)
+                            if (selectedPlaylist?.id == ep.id) {
+                                selectedPlaylist = null
+                            }
+                            playlistToEdit = null
+                        }
+                    }
                 )
             }
 

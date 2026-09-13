@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
@@ -39,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
+import org.jethavanarama.dhammasermons.R
 import org.jethavanarama.dhammasermons.player.PlayerUiState
 import org.jethavanarama.dhammasermons.ui.theme.*
 import kotlin.math.abs
@@ -159,7 +161,9 @@ fun MiniPlayer(
                                     model = sermon.thumbnailUrl,
                                     contentDescription = sermon.title,
                                     modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop
+                                    contentScale = ContentScale.Crop,
+                                    error = painterResource(id = R.drawable.home_header_icon),
+                                    fallback = painterResource(id = R.drawable.home_header_icon)
                                 )
                             }
                             if (playerState.isPlaying) {

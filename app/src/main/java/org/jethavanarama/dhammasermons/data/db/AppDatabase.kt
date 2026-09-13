@@ -5,10 +5,15 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [SermonEntity::class], version = 1, exportSchema = false)
+@Database(
+    entities = [SermonEntity::class, PlaylistEntity::class, PlaylistSermonCrossRef::class],
+    version = 2,
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun sermonDao(): SermonDao
+    abstract fun playlistDao(): PlaylistDao
 
     companion object {
         @Volatile

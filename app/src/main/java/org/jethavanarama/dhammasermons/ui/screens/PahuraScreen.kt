@@ -43,7 +43,8 @@ fun PahuraScreen(
     onDownloadSermon: (Sermon) -> Unit,
     onRefresh: () -> Unit,
     onNextPage: () -> Unit,
-    onPreviousPage: () -> Unit
+    onPreviousPage: () -> Unit,
+    onAddToPlaylistClick: ((Sermon) -> Unit)? = null
 ) {
     val str = strings
     val listState = rememberLazyListState()
@@ -194,6 +195,7 @@ fun PahuraScreen(
                     downloadState = dlState,
                     onPlayClick = { onPlaySermon(sermon, paginatedSermons.sermons) },
                     onDownloadClick = { onDownloadSermon(sermon) },
+                    onAddToPlaylistClick = onAddToPlaylistClick?.let { { it(sermon) } },
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
                 )
             }

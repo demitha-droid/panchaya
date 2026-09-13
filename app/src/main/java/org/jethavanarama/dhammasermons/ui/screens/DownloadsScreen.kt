@@ -24,7 +24,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import coil.compose.AsyncImage
+import org.jethavanarama.dhammasermons.data.db.PlaylistEntity
 import org.jethavanarama.dhammasermons.data.downloader.ActiveDownloadItem
 import org.jethavanarama.dhammasermons.data.model.DownloadState
 import org.jethavanarama.dhammasermons.data.model.Sermon
@@ -43,13 +46,21 @@ fun DownloadsScreen(
     storageUsedBytes: Long,
     playerState: PlayerUiState,
     downloadStates: Map<String, DownloadState>,
+    playlists: List<PlaylistEntity> = emptyList(),
     onPlaySermon: (Sermon, List<Sermon>) -> Unit,
     onDeleteDownload: (Sermon) -> Unit,
     onCancelDownload: (String) -> Unit,
     onRetryDownload: (Sermon) -> Unit,
-    onRefresh: () -> Unit = {}
+    onRefresh: () -> Unit = {},
+    onSelectPlaylist: (PlaylistEntity) -> Unit = {},
+    onCreatePlaylistClick: () -> Unit = {},
+    onEditPlaylistClick: (PlaylistEntity) -> Unit = {},
+    onDeletePlaylistClick: (PlaylistEntity) -> Unit = {},
+    onPlayPlaylistClick: (PlaylistEntity) -> Unit = {},
+    onAddToPlaylistClick: ((Sermon) -> Unit)? = null
 ) {
     val str = strings
+    var selectedSubTab by remember { mutableIntStateOf(0) }
     var searchQuery by remember { mutableStateOf("") }
     val refreshState = rememberPullToRefreshState()
     var sermonToDelete by remember { mutableStateOf<Sermon?>(null) }
@@ -110,195 +121,383 @@ fun DownloadsScreen(
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    // Storage summary card
-                    Surface(
-                        color = SurfaceCard,
-                        shape = RoundedCornerShape(16.dp),
-                        border = CardDefaults.outlinedCardBorder().copy(brush = androidx.compose.ui.graphics.SolidColor(BorderDark)),
-                        modifier = Modifier.fillMaxWidth()
+                    // Sub-tab pills (Downloads | Playlists)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(SurfaceCard)
+                            .padding(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Row(
-                            modifier = Modifier.padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
+                        Surface(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(10.dp))
+                                .clickable { selectedSubTab = 0 },
+                            color = if (selectedSubTab == 0) SaffronPrimary else Color.Transparent,
+                            shape = RoundedCornerShape(10.dp)
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(44.dp)
-                                        .clip(CircleShape)
-                                        .background(SaffronPrimary.copy(alpha = 0.15f)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Folder,
-                                        contentDescription = null,
-                                        tint = SaffronPrimary,
-                                        modifier = Modifier.size(22.dp)
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.width(12.dp))
-
-                                Column {
-                                    Text(
-                                        text = str.storageUsed,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = TextMuted
-                                    )
-                                    Text(
-                                        text = storageFormatted,
-                                        style = MaterialTheme.typography.titleMedium.copy(
-                                            fontWeight = FontWeight.Bold,
-                                            color = TextPrimary
-                                        )
-                                    )
-                                }
-                            }
-
-                            Surface(
-                                color = SurfaceHighlight,
-                                shape = RoundedCornerShape(8.dp)
-                            ) {
-                                Text(
-                                    text = "${downloadedSermons.size}",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = SaffronGold
-                                    ),
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            Text(
+                                text = "${str.tabDownloads} (${downloadedSermons.size})",
+                                modifier = Modifier.padding(vertical = 8.dp),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (selectedSubTab == 0) BackgroundDark else TextSecondary
                                 )
-                            }
+                            )
+                        }
+
+                        Surface(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(10.dp))
+                                .clickable { selectedSubTab = 1 },
+                            color = if (selectedSubTab == 1) SaffronPrimary else Color.Transparent,
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Text(
+                                text = "${str.playlists} (${playlists.size})",
+                                modifier = Modifier.padding(vertical = 8.dp),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (selectedSubTab == 1) BackgroundDark else TextSecondary
+                                )
+                            )
                         }
                     }
 
-                    if (downloadedSermons.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(12.dp))
+                    if (selectedSubTab == 0) {
+                        Spacer(modifier = Modifier.height(14.dp))
 
-                        // Search Bar
-                        OutlinedTextField(
-                            value = searchQuery,
-                            onValueChange = { searchQuery = it },
-                            modifier = Modifier.fillMaxWidth(),
-                            placeholder = { Text(str.searchPlaceholder, color = TextMuted, fontSize = 14.sp) },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Search,
-                                    contentDescription = "Search",
-                                    tint = TextMuted
-                                )
-                            },
-                            singleLine = true,
+                        // Storage summary card
+                        Surface(
+                            color = SurfaceCard,
                             shape = RoundedCornerShape(16.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = SurfaceCard,
-                                unfocusedContainerColor = SurfaceCard,
-                                focusedBorderColor = SaffronPrimary,
-                                unfocusedBorderColor = BorderDark,
-                                cursorColor = SaffronPrimary,
-                                focusedTextColor = TextPrimary,
-                                unfocusedTextColor = TextPrimary
+                            border = CardDefaults.outlinedCardBorder().copy(brush = androidx.compose.ui.graphics.SolidColor(BorderDark)),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(44.dp)
+                                            .clip(CircleShape)
+                                            .background(SaffronPrimary.copy(alpha = 0.15f)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Folder,
+                                            contentDescription = null,
+                                            tint = SaffronPrimary,
+                                            modifier = Modifier.size(22.dp)
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.width(12.dp))
+
+                                    Column {
+                                        Text(
+                                            text = str.storageUsed,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = TextMuted
+                                        )
+                                        Text(
+                                            text = storageFormatted,
+                                            style = MaterialTheme.typography.titleMedium.copy(
+                                                fontWeight = FontWeight.Bold,
+                                                color = TextPrimary
+                                            )
+                                        )
+                                    }
+                                }
+
+                                Surface(
+                                    color = SurfaceHighlight,
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Text(
+                                        text = "${downloadedSermons.size}",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = SaffronGold
+                                        ),
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                    )
+                                }
+                            }
+                        }
+
+                        if (downloadedSermons.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            // Search Bar
+                            OutlinedTextField(
+                                value = searchQuery,
+                                onValueChange = { searchQuery = it },
+                                modifier = Modifier.fillMaxWidth(),
+                                placeholder = { Text(str.searchPlaceholder, color = TextMuted, fontSize = 14.sp) },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Search,
+                                        contentDescription = "Search",
+                                        tint = TextMuted
+                                    )
+                                },
+                                singleLine = true,
+                                shape = RoundedCornerShape(16.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedContainerColor = SurfaceCard,
+                                    unfocusedContainerColor = SurfaceCard,
+                                    focusedBorderColor = SaffronPrimary,
+                                    unfocusedBorderColor = BorderDark,
+                                    cursorColor = SaffronPrimary,
+                                    focusedTextColor = TextPrimary,
+                                    unfocusedTextColor = TextPrimary
+                                )
                             )
-                        )
+                        }
+                    } else {
+                        // Playlists Action Bar
+                        Spacer(modifier = Modifier.height(14.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = str.playlistsSeriesTitle,
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextPrimary
+                                )
+                            )
+
+                            Button(
+                                onClick = onCreatePlaylistClick,
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = SaffronPrimary,
+                                    contentColor = BackgroundDark
+                                ),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(str.createPlaylist, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
                     }
                 }
             }
 
-            // Section 1: Active Downloads
-            if (activeDownloads.isNotEmpty()) {
+            if (selectedSubTab == 0) {
+                // Section 1: Active Downloads
+                if (activeDownloads.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "${str.activeDownloadsLabel} (${activeDownloads.size})",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                color = SaffronGold
+                            ),
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
+                        )
+                    }
+
+                    items(activeDownloads, key = { it.sermon.id }) { item ->
+                        ActiveDownloadCard(
+                            item = item,
+                            onCancelClick = { onCancelDownload(item.sermon.id) },
+                            onRetryClick = { onRetryDownload(item.sermon) },
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
+                        )
+                    }
+
+                    item { Spacer(modifier = Modifier.height(10.dp)) }
+                }
+
+                // Section 2: Downloaded Sermons List
                 item {
                     Text(
-                        text = "බාගත වෙමින් පවතින (${activeDownloads.size})",
+                        text = if (searchQuery.isBlank()) "${str.downloadedSermonsLabel} (${downloadedSermons.size})" else "${str.searchResultsLabel} (${filteredSermons.size})",
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.SemiBold,
-                            color = SaffronGold
+                            color = TextPrimary
                         ),
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
                     )
                 }
 
-                items(activeDownloads, key = { it.sermon.id }) { item ->
-                    ActiveDownloadCard(
-                        item = item,
-                        onCancelClick = { onCancelDownload(item.sermon.id) },
-                        onRetryClick = { onRetryDownload(item.sermon) },
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
-                    )
-                }
-
-                item { Spacer(modifier = Modifier.height(10.dp)) }
-            }
-
-            // Section 2: Downloaded Sermons List
-            item {
-                Text(
-                    text = if (searchQuery.isBlank()) "බාගත කළ දේශනා (${downloadedSermons.size})" else "සෙවුම් ප්‍රතිඵල (${filteredSermons.size})",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = TextPrimary
-                    ),
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
-                )
-            }
-
-            // Empty State
-            if (downloadedSermons.isEmpty() && activeDownloads.isEmpty()) {
-                item {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(40.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Box(
+                // Empty State
+                if (downloadedSermons.isEmpty() && activeDownloads.isEmpty()) {
+                    item {
+                        Column(
                             modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(40.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Box(
+                                modifier = Modifier
                                 .size(72.dp)
                                 .clip(CircleShape)
                                 .background(SurfaceCard),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.CloudDownload,
-                                contentDescription = null,
-                                tint = TextMuted,
-                                modifier = Modifier.size(36.dp)
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.CloudDownload,
+                                    contentDescription = null,
+                                    tint = TextMuted,
+                                    modifier = Modifier.size(36.dp)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Text(
+                                text = str.noDownloads,
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = TextPrimary
+                            )
+
+                            Spacer(modifier = Modifier.height(6.dp))
+
+                            Text(
+                                text = str.noDownloadsHint,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = TextMuted,
+                                textAlign = TextAlign.Center
                             )
                         }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Text(
-                            text = "තවමත් බාගත කළ දේශනා නොමැත",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                            color = TextPrimary
-                        )
-
-                        Spacer(modifier = Modifier.height(6.dp))
-
-                        Text(
-                            text = "ඕනෑම දේශනාවක Download බොත්තම ඔබා Offline ඇසීමට බාගත කරගන්න.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = TextMuted,
-                            textAlign = TextAlign.Center
-                        )
                     }
                 }
-            }
 
-            // Downloaded Sermons Items
-            items(filteredSermons, key = { it.id }) { sermon ->
-                val isCurrent = playerState.currentSermon?.id == sermon.id
-                val isPlaying = isCurrent && playerState.isPlaying
-                val dlState = downloadStates[sermon.id] ?: sermon.downloadState
+                // Downloaded Sermons Items
+                items(filteredSermons, key = { it.id }) { sermon ->
+                    val isCurrent = playerState.currentSermon?.id == sermon.id
+                    val isPlaying = isCurrent && playerState.isPlaying
 
-                DownloadedSermonRow(
-                    sermon = sermon,
-                    isPlaying = isPlaying,
-                    isCurrent = isCurrent,
-                    onPlayClick = { onPlaySermon(sermon, filteredSermons) },
-                    onDeleteClick = { sermonToDelete = sermon },
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
-                )
+                    DownloadedSermonRow(
+                        sermon = sermon,
+                        isPlaying = isPlaying,
+                        isCurrent = isCurrent,
+                        onPlayClick = { onPlaySermon(sermon, filteredSermons) },
+                        onDeleteClick = { sermonToDelete = sermon },
+                        onAddToPlaylistClick = onAddToPlaylistClick?.let { { it(sermon) } },
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
+                    )
+                }
+            } else {
+                // Playlists Tab (Design 3 Bento Grid)
+                if (playlists.isEmpty()) {
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(40.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(72.dp)
+                                    .clip(CircleShape)
+                                    .background(SurfaceCard),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.QueueMusic,
+                                    contentDescription = null,
+                                    tint = SaffronPrimary,
+                                    modifier = Modifier.size(36.dp)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Text(
+                                text = str.noPlaylistsCreated,
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = TextPrimary
+                            )
+
+                            Spacer(modifier = Modifier.height(6.dp))
+
+                            Text(
+                                text = str.noPlaylistsSubtitle,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = TextMuted,
+                                textAlign = TextAlign.Center
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Button(
+                                onClick = onCreatePlaylistClick,
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = SaffronPrimary,
+                                    contentColor = BackgroundDark
+                                )
+                            ) {
+                                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(str.createPlaylist, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                } else {
+                    val featuredPlaylist = playlists.firstOrNull()
+                    val remainingPlaylists = if (playlists.size > 1) playlists.drop(1) else emptyList()
+
+                    // Featured Hero Bento Card
+                    if (featuredPlaylist != null) {
+                        item {
+                            Box(modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
+                                FeaturedHeroBentoCard(
+                                    playlist = featuredPlaylist,
+                                    onOpen = { onSelectPlaylist(featuredPlaylist) },
+                                    onPlay = { onPlayPlaylistClick(featuredPlaylist) },
+                                    onEdit = { onEditPlaylistClick(featuredPlaylist) },
+                                    onDelete = { onDeletePlaylistClick(featuredPlaylist) }
+                                )
+                            }
+                        }
+                    }
+
+                    // Remaining Bento Tiles (in 2-column rows)
+                    remainingPlaylists.chunked(2).forEach { pair ->
+                        item {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 20.dp, vertical = 6.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                pair.forEach { p ->
+                                    Box(modifier = Modifier.weight(1f)) {
+                                        BentoPlaylistTile(
+                                            playlist = p,
+                                            onOpen = { onSelectPlaylist(p) },
+                                            onPlay = { onPlayPlaylistClick(p) },
+                                            onEdit = { onEditPlaylistClick(p) },
+                                            onDelete = { onDeletePlaylistClick(p) }
+                                        )
+                                    }
+                                }
+                                if (pair.size == 1) {
+                                    Spacer(modifier = Modifier.weight(1f))
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -310,14 +509,14 @@ fun DownloadsScreen(
             onDismissRequest = { sermonToDelete = null },
             title = {
                 Text(
-                    text = "දේශනාව ඉවත් කරන්නද?",
+                    text = str.deleteConfirmTitle,
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary
                 )
             },
             text = {
                 Text(
-                    text = "\"${s.title}\" ඔබගේ දුරකථනයෙන් ඉවත් කර ඉඩ නිදහස් කිරීමට අවශ්‍යද?",
+                    text = "\"${s.title}\" ${str.deleteConfirmMessage}",
                     color = TextSecondary
                 )
             },
@@ -350,6 +549,7 @@ private fun ActiveDownloadCard(
     onRetryClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val str = strings
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -417,7 +617,7 @@ private fun ActiveDownloadCard(
 
             if (item.isFailed) {
                 Text(
-                    text = "අසාර්ථක විය: ${item.errorMessage.orEmpty()}",
+                    text = "${str.downloadFailed}: ${item.errorMessage.orEmpty()}",
                     style = MaterialTheme.typography.labelSmall,
                     color = AccentPahuraRed
                 )
@@ -438,7 +638,7 @@ private fun ActiveDownloadCard(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "බාගත වෙමින් පවතී...",
+                            text = str.downloadingProgress,
                             style = MaterialTheme.typography.labelSmall,
                             color = TextMuted
                         )
@@ -461,8 +661,10 @@ private fun DownloadedSermonRow(
     isCurrent: Boolean,
     onPlayClick: () -> Unit,
     onDeleteClick: () -> Unit,
+    onAddToPlaylistClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val str = strings
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -536,7 +738,26 @@ private fun DownloadedSermonRow(
                 )
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(6.dp))
+
+            // Add to playlist button
+            if (onAddToPlaylistClick != null) {
+                IconButton(
+                    onClick = onAddToPlaylistClick,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(SurfaceHighlight.copy(alpha = 0.5f))
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlaylistAdd,
+                        contentDescription = str.addToPlaylist,
+                        tint = SaffronPrimary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(6.dp))
+            }
 
             // Delete action button
             IconButton(

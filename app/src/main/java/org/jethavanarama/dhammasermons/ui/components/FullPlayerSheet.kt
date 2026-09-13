@@ -19,12 +19,14 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import org.jethavanarama.dhammasermons.R
 import org.jethavanarama.dhammasermons.data.model.DownloadState
 import org.jethavanarama.dhammasermons.data.model.Sermon
 import org.jethavanarama.dhammasermons.data.model.SermonSource
@@ -46,7 +48,8 @@ fun FullPlayerSheet(
     onPrevious: () -> Unit,
     onSpeedChange: (Float) -> Unit,
     onSleepTimerSet: (Int) -> Unit,
-    onDownloadClick: () -> Unit
+    onDownloadClick: () -> Unit,
+    onAddToPlaylistClick: (() -> Unit)? = null
 ) {
     val sermon = playerState.currentSermon ?: return
     var showSpeedDialog by remember { mutableStateOf(false) }
@@ -161,7 +164,9 @@ fun FullPlayerSheet(
                             model = sermon.thumbnailUrl,
                             contentDescription = sermon.title,
                             modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
+                            contentScale = ContentScale.Crop,
+                            error = painterResource(id = R.drawable.home_header),
+                            fallback = painterResource(id = R.drawable.home_header)
                         )
                     } else {
                         Icon(
@@ -391,6 +396,28 @@ fun FullPlayerSheet(
                     ),
                     border = BorderStroke(1.dp, BorderDark)
                 )
+
+                if (onAddToPlaylistClick != null) {
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    AssistChip(
+                        onClick = onAddToPlaylistClick,
+                        label = { Text(strings.addToPlaylist) },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.PlaylistAdd,
+                                contentDescription = "Add to Playlist",
+                                modifier = Modifier.size(16.dp)
+                            )
+                        },
+                        colors = AssistChipDefaults.assistChipColors(
+                            containerColor = SurfaceCard,
+                            labelColor = TextPrimary,
+                            leadingIconContentColor = SaffronPrimary
+                        ),
+                        border = BorderStroke(1.dp, BorderDark)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(32.dp))

@@ -12,6 +12,9 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import android.os.Bundle
 import org.jethavanarama.dhammasermons.DhammaApp
 import org.jethavanarama.dhammasermons.data.db.AppDatabase
+import org.jethavanarama.dhammasermons.data.db.PlaylistEntity
+import org.jethavanarama.dhammasermons.data.db.PlaylistSermonCrossRef
+import org.jethavanarama.dhammasermons.data.db.SermonEntity
 import org.jethavanarama.dhammasermons.data.downloader.ActiveDownloadItem
 import org.jethavanarama.dhammasermons.data.downloader.SermonDownloadManager
 import org.jethavanarama.dhammasermons.data.extractor.JethavanaramaExtractor
@@ -31,6 +34,7 @@ import org.jethavanarama.dhammasermons.data.repository.TripitakaRepository
 import org.jethavanarama.dhammasermons.player.AudioPlayerManager
 import org.jethavanarama.dhammasermons.player.PlayerUiState
 import org.jethavanarama.dhammasermons.ui.i18n.AppLanguage
+import org.jethavanarama.dhammasermons.ui.i18n.getStrings
 import org.jethavanarama.dhammasermons.ui.theme.ThemeMode
 
 @UnstableApi
@@ -41,6 +45,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val downloadManager: SermonDownloadManager = app.downloadManager
     private val db = AppDatabase.getDatabase(application)
     private val sermonDao = db.sermonDao()
+    private val playlistDao = db.playlistDao()
     private val prefs = application.getSharedPreferences("panchaya_settings", android.content.Context.MODE_PRIVATE)
     private val analytics by lazy {
         try {
@@ -157,6 +162,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     // Offline downloads flow from Room DB
     val downloadedSermons: StateFlow<List<Sermon>> = sermonDao.getDownloadedSermons()
         .map { list -> list.map { it.toDomain() } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // Playlists flow from Room DB
+    val playlists: StateFlow<List<PlaylistEntity>> = playlistDao.getPlaylists()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _storageUsedBytes = MutableStateFlow(0L)
@@ -286,6 +295,36 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         loadDhammapada()
         loadTripitaka()
         updateStorageUsage()
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val currentPlaylists = playlistDao.getPlaylists().first()
+                val legacyExampleNames = setOf(
+                    "භාවනා වැඩසටහන්", "Meditation Programs",
+                    "මහා දේශනා", "Great Sermons",
+                    "දිනපතා ශ්‍රවණයට", "Daily Listening"
+                )
+                // Remove legacy example playlists if any exist
+                for (pl in currentPlaylists) {
+                    if (legacyExampleNames.contains(pl.name.trim())) {
+                        playlistDao.deletePlaylist(pl.id)
+                    }
+                }
+                val updatedPlaylists = playlistDao.getPlaylists().first()
+                if (updatedPlaylists.isEmpty()) {
+                    playlistDao.insertPlaylist(
+                        PlaylistEntity(
+                            name = "Playlist 1",
+                            description = "",
+                            iconName = "dhamma_wheel",
+                            colorAccentHex = "#D97706"
+                        )
+                    )
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     fun refreshAllFeeds(forceNetworkRefresh: Boolean = false) {
@@ -602,6 +641,123 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun updateStorageUsage() {
         viewModelScope.launch(Dispatchers.IO) {
             _storageUsedBytes.value = downloadManager.getStorageUsedBytes()
+        }
+    }
+
+    // ==========================================
+    // Playlist Management Methods
+    // ==========================================
+
+    fun getSermonsForPlaylist(playlistId: Long): Flow<List<Sermon>> {
+        return playlistDao.getSermonsForPlaylist(playlistId).map { list ->
+            list.map { it.toDomain() }
+        }
+    }
+
+    fun getPlaylistById(playlistId: Long): Flow<PlaylistEntity?> {
+        return playlistDao.getPlaylistById(playlistId)
+    }
+
+    fun getPlaylistsContainingSermon(sermonId: String): Flow<List<Long>> {
+        return playlistDao.getPlaylistsContainingSermon(sermonId)
+    }
+
+    fun createPlaylist(
+        name: String,
+        description: String = "",
+        iconName: String = "dhamma_wheel",
+        colorAccentHex: String = "#D97706"
+    ) {
+        if (name.isBlank()) return
+        viewModelScope.launch(Dispatchers.IO) {
+            val entity = PlaylistEntity(
+                name = name.trim(),
+                description = description.trim(),
+                iconName = iconName,
+                colorAccentHex = colorAccentHex
+            )
+            playlistDao.insertPlaylist(entity)
+        }
+    }
+
+    fun updatePlaylist(
+        id: Long,
+        name: String,
+        description: String,
+        iconName: String,
+        colorAccentHex: String
+    ) {
+        if (name.isBlank()) return
+        viewModelScope.launch(Dispatchers.IO) {
+            val existing = playlistDao.getPlaylistByIdOnce(id) ?: return@launch
+            val updated = existing.copy(
+                name = name.trim(),
+                description = description.trim(),
+                iconName = iconName,
+                colorAccentHex = colorAccentHex,
+                updatedAt = System.currentTimeMillis()
+            )
+            playlistDao.updatePlaylist(updated)
+        }
+    }
+
+    fun updatePlaylist(playlist: PlaylistEntity) {
+        viewModelScope.launch(Dispatchers.IO) {
+            playlistDao.updatePlaylist(playlist)
+        }
+    }
+
+    fun deletePlaylist(id: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            playlistDao.deletePlaylist(id)
+        }
+    }
+
+    fun addSermonToPlaylist(playlistId: Long, sermon: Sermon) {
+        viewModelScope.launch(Dispatchers.IO) {
+            sermonDao.insertOrUpdate(SermonEntity.fromDomain(sermon))
+            val maxOrder = playlistDao.getMaxOrderIndex(playlistId) ?: -1
+            val crossRef = PlaylistSermonCrossRef(
+                playlistId = playlistId,
+                sermonId = sermon.id,
+                orderIndex = maxOrder + 1
+            )
+            playlistDao.insertSermonCrossRef(crossRef)
+            playlistDao.touchPlaylistUpdated(playlistId)
+        }
+    }
+
+    fun removeSermonFromPlaylist(playlistId: Long, sermonId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            playlistDao.removeSermonFromPlaylist(playlistId, sermonId)
+            playlistDao.touchPlaylistUpdated(playlistId)
+        }
+    }
+
+    fun toggleSermonInPlaylist(playlistId: Long, sermon: Sermon, isCurrentlyIn: Boolean) {
+        if (isCurrentlyIn) {
+            removeSermonFromPlaylist(playlistId, sermon.id)
+        } else {
+            addSermonToPlaylist(playlistId, sermon)
+        }
+    }
+
+    fun reorderSermonsInPlaylist(playlistId: Long, orderedSermonIds: List<String>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            playlistDao.reorderSermons(playlistId, orderedSermonIds)
+        }
+    }
+
+    fun playPlaylist(playlistId: Long, shuffle: Boolean = false) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val sermonEntities = playlistDao.getSermonsForPlaylistOnce(playlistId)
+            val sermons = sermonEntities.map { it.toDomain() }
+            if (sermons.isNotEmpty()) {
+                val queue = if (shuffle) sermons.shuffled() else sermons
+                withContext(Dispatchers.Main) {
+                    playerManager.playSermon(queue.first(), queue)
+                }
+            }
         }
     }
 }

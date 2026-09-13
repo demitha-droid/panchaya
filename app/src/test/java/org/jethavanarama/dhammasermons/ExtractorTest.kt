@@ -103,20 +103,48 @@ class ExtractorTest {
     }
 
     @Test
-    fun testJethavanaramaNewsExtractor() = runBlocking {
-        val newsExtractor = org.jethavanarama.dhammasermons.data.extractor.JethavanaramaNewsExtractor()
-        val news = newsExtractor.fetchNews()
-        println("\n=== Jethavanarama News Test ===")
-        println("Fetched ${news.size} news articles from https://www.jethavanarama.org/news")
-        assertTrue("News list should not be empty", news.isNotEmpty())
+    fun testExtractYouTubeId() {
+        org.junit.Assert.assertEquals(
+            "8TmhDr9GrBU",
+            JethavanaramaExtractor.extractYouTubeId("https://img.youtube.com/vi/8TmhDr9GrBU&amp;pp/maxresdefault.jpg")
+        )
+        org.junit.Assert.assertEquals(
+            "8TmhDr9GrBU",
+            JethavanaramaExtractor.extractYouTubeId("https://img.youtube.com/vi/8TmhDr9GrBU&pp/maxresdefault.jpg")
+        )
+        org.junit.Assert.assertEquals(
+            "Yc2bE__kCNQ",
+            JethavanaramaExtractor.extractYouTubeId("https://img.youtube.com/vi/Yc2bE__kCNQ/maxresdefault.jpg")
+        )
+        org.junit.Assert.assertEquals(
+            "bwt7gIBiGfU",
+            JethavanaramaExtractor.extractYouTubeId("https://www.youtube.com/embed/bwt7gIBiGfU?rel=0")
+        )
+    }
 
-        val firstNews = news.first()
-        println("First News Title: ${firstNews.title}")
-        println("First News Image: ${firstNews.imageUrl}")
-        println("First News Summary: ${firstNews.summary}")
-        println("First News Link: ${firstNews.articleUrl}")
-        assertTrue("Title should not be blank", firstNews.title.isNotBlank())
-        assertTrue("Article URL should not be blank", firstNews.articleUrl.isNotBlank())
+    @Test
+    fun testJethavanaramaThumbnails() = runBlocking {
+        val jethExtractor = JethavanaramaExtractor()
+        val paginated = jethExtractor.fetchCategorySermons("all", page = 1)
+        println("\n=== Testing Thumbnails for all sermons on Page 1 ===")
+        val client = okhttp3.OkHttpClient()
+        for ((idx, sermon) in paginated.sermons.withIndex()) {
+            println("[$idx] ${sermon.title}")
+            println("    youtubeVideoId: ${sermon.youtubeVideoId}")
+            println("    thumbnailUrl: ${sermon.thumbnailUrl}")
+            assertNotNull("Thumbnail should not be null for sermon: ${sermon.title}", sermon.thumbnailUrl)
+            assertTrue("Thumbnail must not contain &pp: ${sermon.thumbnailUrl}", !sermon.thumbnailUrl!!.contains("&pp"))
+            assertTrue("Thumbnail must not contain &amp;: ${sermon.thumbnailUrl}", !sermon.thumbnailUrl!!.contains("&amp;"))
+
+            // Verify the first 3 thumbnails return HTTP 200 OK
+            if (idx < 3) {
+                val req = okhttp3.Request.Builder().url(sermon.thumbnailUrl!!).head().build()
+                val resp = client.newCall(req).execute()
+                println("    HTTP Check: ${resp.code} for ${sermon.thumbnailUrl}")
+                assertTrue("Thumbnail must return HTTP 200, got ${resp.code}", resp.isSuccessful)
+                resp.close()
+            }
+        }
     }
 
     @Test

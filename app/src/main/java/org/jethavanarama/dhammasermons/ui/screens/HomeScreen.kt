@@ -40,6 +40,13 @@ import org.jethavanarama.dhammasermons.data.model.SermonSource
 import org.jethavanarama.dhammasermons.player.PlayerUiState
 import org.jethavanarama.dhammasermons.ui.components.DharmaChakraRefreshIndicator
 import org.jethavanarama.dhammasermons.ui.components.SermonCard
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.QueueMusic
+import org.jethavanarama.dhammasermons.data.db.PlaylistEntity
+import org.jethavanarama.dhammasermons.data.db.getDisplayName
+import org.jethavanarama.dhammasermons.ui.components.PLAYLIST_ICONS
+import org.jethavanarama.dhammasermons.ui.components.parseHexColor
 import org.jethavanarama.dhammasermons.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,6 +56,7 @@ fun HomeScreen(
     isLoading: Boolean,
     playerState: PlayerUiState,
     downloadStates: Map<String, DownloadState>,
+    playlists: List<PlaylistEntity> = emptyList(),
     onPlaySermon: (Sermon, List<Sermon>) -> Unit,
     onDownloadSermon: (Sermon) -> Unit,
     onRefresh: () -> Unit,
@@ -56,7 +64,10 @@ fun HomeScreen(
     onNavigateToJethavanarama: () -> Unit,
     onNavigateToPahura: () -> Unit,
     onNavigateToDhammapada: () -> Unit = {},
-    onOpenTripitaka: () -> Unit = {}
+    onOpenTripitaka: () -> Unit = {},
+    onOpenPlaylists: () -> Unit = {},
+    onSelectPlaylist: ((PlaylistEntity) -> Unit)? = null,
+    onAddToPlaylistClick: ((Sermon) -> Unit)? = null
 ) {
     val str = strings
     var searchQuery by remember { mutableStateOf("") }
@@ -220,14 +231,14 @@ fun HomeScreen(
                             shape = RoundedCornerShape(20.dp)
                         ) {
                             Box(modifier = Modifier.fillMaxSize()) {
-                                if (!featuredSermon.thumbnailUrl.isNullOrBlank()) {
-                                    AsyncImage(
-                                        model = featuredSermon.thumbnailUrl,
-                                        contentDescription = featuredSermon.title,
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentScale = ContentScale.Crop
-                                    )
-                                }
+                                AsyncImage(
+                                    model = featuredSermon.thumbnailUrl,
+                                    contentDescription = featuredSermon.title,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop,
+                                    error = painterResource(id = R.drawable.home_header),
+                                    fallback = painterResource(id = R.drawable.home_header)
+                                )
 
                                 // Dark Gradient Overlay
                                 Box(
@@ -350,7 +361,7 @@ fun HomeScreen(
                                         )
                                     )
                                     Text(
-                                        text = "වර්ග 26 • ගාථා 423 • අටුවා කථා වස්තු",
+                                        text = str.dhammapadaSubtitle,
                                         style = MaterialTheme.typography.labelSmall,
                                         color = TextSecondary
                                     )
@@ -361,12 +372,110 @@ fun HomeScreen(
                                     shape = RoundedCornerShape(8.dp)
                                 ) {
                                     Text(
-                                        text = "බලන්න",
+                                        text = str.viewAll,
                                         color = SaffronPrimary,
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                     )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Bento Playlists Preview Row
+            if (searchQuery.isBlank() && playlists.isNotEmpty()) {
+                item {
+                    Column(modifier = Modifier.padding(top = 10.dp, bottom = 4.dp)) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp, vertical = 6.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = str.playlists,
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextPrimary
+                                )
+                            )
+                            Text(
+                                text = "${str.seeAll} (${playlists.size})",
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    color = SaffronPrimary,
+                                    fontWeight = FontWeight.SemiBold
+                                ),
+                                modifier = Modifier.clickable { onOpenPlaylists() }
+                            )
+                        }
+
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = 20.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            items(playlists.take(5), key = { it.id }) { pl ->
+                                val accentColor = parseHexColor(pl.colorAccentHex)
+                                val emoji = PLAYLIST_ICONS.firstOrNull { it.first == pl.iconName }?.second ?: "☸"
+
+                                Surface(
+                                    onClick = { onSelectPlaylist?.invoke(pl) ?: onOpenPlaylists() },
+                                    color = SurfaceCard,
+                                    shape = RoundedCornerShape(16.dp),
+                                    border = BorderStroke(1.dp, BorderDark),
+                                    modifier = Modifier
+                                        .width(160.dp)
+                                        .height(96.dp)
+                                ) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(12.dp),
+                                        verticalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(32.dp)
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .background(accentColor.copy(alpha = 0.2f)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(text = emoji, fontSize = 16.sp)
+                                        }
+
+                                        Text(
+                                            text = pl.getDisplayName(str),
+                                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                                            color = TextPrimary,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                }
+                            }
+
+                            item {
+                                Surface(
+                                    onClick = onOpenPlaylists,
+                                    color = SurfaceDark,
+                                    shape = RoundedCornerShape(16.dp),
+                                    border = BorderStroke(1.dp, BorderDark),
+                                    modifier = Modifier
+                                        .width(96.dp)
+                                        .height(96.dp)
+                                ) {
+                                    Column(
+                                        modifier = Modifier.fillMaxSize(),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(Icons.Default.Add, contentDescription = null, tint = SaffronPrimary, modifier = Modifier.size(20.dp))
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(text = "+ ${str.createPlaylist}", color = SaffronPrimary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                    }
                                 }
                             }
                         }
@@ -406,6 +515,7 @@ fun HomeScreen(
                     downloadState = dlState,
                     onPlayClick = { onPlaySermon(sermon, filteredSermons) },
                     onDownloadClick = { onDownloadSermon(sermon) },
+                    onAddToPlaylistClick = { onAddToPlaylistClick?.invoke(sermon) },
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
                 )
             }

@@ -136,14 +136,15 @@ class JethavanaramaExtractor(
             val imgEl = card.selectFirst("img")
             var rawThumb = imgEl?.attr("src")?.trim()
 
-            // Extract YouTube video ID if image is from img.youtube.com
-            var youtubeId: String? = null
-            if (!rawThumb.isNullOrBlank() && rawThumb.contains("img.youtube.com/vi/")) {
-                val vid = rawThumb.substringAfter("img.youtube.com/vi/").substringBefore("/")
-                if (vid.isNotBlank()) {
-                    youtubeId = vid
-                    rawThumb = "https://i.ytimg.com/vi/$vid/hqdefault.jpg"
-                }
+            // Filter out placeholder / logo images
+            if (rawThumb != null && (rawThumb.contains("elementor-placeholder-image") || rawThumb.contains("/logo.") || rawThumb.endsWith("logo.png"))) {
+                rawThumb = null
+            }
+
+            // Extract YouTube video ID if image is from img.youtube.com or ytimg.com
+            val youtubeId = extractYouTubeId(rawThumb)
+            if (youtubeId != null) {
+                rawThumb = "https://i.ytimg.com/vi/$youtubeId/hqdefault.jpg"
             } else if (!rawThumb.isNullOrBlank() && !rawThumb.startsWith("http")) {
                 rawThumb = "$baseUrl$rawThumb"
             }
@@ -183,13 +184,13 @@ class JethavanaramaExtractor(
                 val imgEl = parentCard?.selectFirst("img") ?: el.selectFirst("img")
                 var rawThumb = imgEl?.attr("src")?.trim()
 
-                var youtubeId: String? = null
-                if (!rawThumb.isNullOrBlank() && rawThumb.contains("img.youtube.com/vi/")) {
-                    val vid = rawThumb.substringAfter("img.youtube.com/vi/").substringBefore("/")
-                    if (vid.isNotBlank()) {
-                        youtubeId = vid
-                        rawThumb = "https://i.ytimg.com/vi/$vid/hqdefault.jpg"
-                    }
+                if (rawThumb != null && (rawThumb.contains("elementor-placeholder-image") || rawThumb.contains("/logo.") || rawThumb.endsWith("logo.png"))) {
+                    rawThumb = null
+                }
+
+                val youtubeId = extractYouTubeId(rawThumb)
+                if (youtubeId != null) {
+                    rawThumb = "https://i.ytimg.com/vi/$youtubeId/hqdefault.jpg"
                 } else if (!rawThumb.isNullOrBlank() && !rawThumb.startsWith("http")) {
                     rawThumb = "$baseUrl$rawThumb"
                 }
@@ -290,19 +291,28 @@ class JethavanaramaExtractor(
             }
 
             // 4. YouTube fallback if present on page
-            var youtubeId = sermon.youtubeVideoId
+            var youtubeId = extractYouTubeId(sermon.youtubeVideoId)
             if (youtubeId.isNullOrBlank()) {
                 val iframe = doc.selectFirst("iframe[src*='youtube.com'], iframe[src*='youtu.be']")
                 if (iframe != null) {
-                    val src = iframe.attr("src")
-                    val ytId = src.substringAfter("/embed/").substringBefore("?").substringBefore("&")
-                    if (ytId.isNotBlank()) youtubeId = ytId
+                    youtubeId = extractYouTubeId(iframe.attr("src"))
+                }
+            }
+            if (youtubeId.isNullOrBlank()) {
+                val ytImg = doc.selectFirst("img[src*='youtube.com/vi/'], img[src*='ytimg.com/vi/']")
+                if (ytImg != null) {
+                    youtubeId = extractYouTubeId(ytImg.attr("src"))
                 }
             }
 
             var thumb = sermon.thumbnailUrl
-            if (thumb.isNullOrBlank() && !youtubeId.isNullOrBlank()) {
-                thumb = "https://i.ytimg.com/vi/$youtubeId/hqdefault.jpg"
+            if (thumb.isNullOrBlank() || thumb.contains("elementor-placeholder-image") || thumb.contains("/logo.") || thumb.endsWith("logo.png")) {
+                thumb = if (!youtubeId.isNullOrBlank()) "https://i.ytimg.com/vi/$youtubeId/hqdefault.jpg" else null
+            } else {
+                val thumbYtId = extractYouTubeId(thumb)
+                if (thumbYtId != null) {
+                    thumb = "https://i.ytimg.com/vi/$thumbYtId/hqdefault.jpg"
+                }
             }
 
             var dur = sermon.durationSeconds
@@ -332,7 +342,7 @@ class JethavanaramaExtractor(
         val videoId = if (videoIdOrId.startsWith("/sermons/")) {
             resolvedCache[videoIdOrId]?.youtubeVideoId.orEmpty()
         } else {
-            videoIdOrId
+            extractYouTubeId(videoIdOrId) ?: videoIdOrId
         }
 
         if (videoId.isNotBlank()) {
@@ -356,5 +366,21 @@ class JethavanaramaExtractor(
         }
 
         0L
+    }
+
+    companion object {
+        private val YOUTUBE_ID_REGEX = Regex("""(?:youtube\.com/vi/|ytimg\.com/vi/|/vi/|/embed/|watch\?v=|youtu\.be/)([a-zA-Z0-9_-]{11})""")
+
+        fun extractYouTubeId(urlOrText: String?): String? {
+            if (urlOrText.isNullOrBlank()) return null
+            val text = urlOrText.replace("&amp;", "&")
+            val match = YOUTUBE_ID_REGEX.find(text)
+            if (match != null) return match.groupValues[1]
+            if (text.contains("/vi/")) {
+                val raw = text.substringAfter("/vi/").substringBefore("/").substringBefore("&").substringBefore("?").trim()
+                if (raw.length >= 11) return raw.take(11)
+            }
+            return null
+        }
     }
 }
