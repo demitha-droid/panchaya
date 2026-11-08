@@ -279,7 +279,7 @@ class AudioPlayerManager private constructor(private val context: Context) {
                             launch(Dispatchers.Main) {
                                 _uiState.value = _uiState.value.copy(
                                     isBuffering = false,
-                                    errorMessage = result.message
+                                    errorMessage = result.message.also { msg -> android.widget.Toast.makeText(context, msg, android.widget.Toast.LENGTH_LONG).show() }
                                 )
                             }
                             return@launch

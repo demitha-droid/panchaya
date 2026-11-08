@@ -43,6 +43,17 @@ class PahuraYouTubeExtractor(
 
     private val streamCache = ConcurrentHashMap<String, AudioExtractionResult.Success>()
     
+    // Invidious instances cache
+    @Volatile
+    private var lastInstancesFetchTime = 0L
+    private val dynamicInstances = mutableListOf<String>()
+    private val staticFallbackInstances = listOf(
+        "https://yt.chocolatemoo53.com",
+        "https://inv.nadeko.net",
+        "https://invidious.nerdvpn.de",
+        "https://invidious.tiekoetter.com"
+    )
+    
     // Videos pagination
     private val pageTokens = ConcurrentHashMap<Int, String>()
     private val pageCache = ConcurrentHashMap<Int, PaginatedSermons>()
@@ -340,27 +351,16 @@ class PahuraYouTubeExtractor(
     }
 
     /**
-     * Resolves high-quality MP3 audio stream for any YouTube video/short:
+     * Resolves high-quality audio stream for any YouTube video/short:
      * 1. Check in-memory cache
-     * 2. Fast multi-node SaveNow / Loader / Affadaffa conversion cluster
-     * 3. Public Invidious & Piped audio streams
-     * 4. NewPipeExtractor with automatic initialization
+     * 2. High-performance Invidious audio streams & /latest_version redirects
+     * 3. NewPipeExtractor with automatic initialization
+     * 4. Multi-node fast converter cluster
      */
     suspend fun extractAudioStreamUrl(videoId: String): AudioExtractionResult = withContext(Dispatchers.IO) {
         streamCache[videoId]?.let { return@withContext it }
 
-        // Strategy 1: Fast Multi-Node SaveNow / Loader conversion cluster
-        try {
-            val result = extractFromLoaderAndSaveNow(videoId)
-            if (result is AudioExtractionResult.Success) {
-                streamCache[videoId] = result
-                return@withContext result
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        // Strategy 2: Invidious & Piped Audio Streams
+        // Strategy 1: Invidious Direct Audio Stream & Proxy Resolution (Fastest & most up-to-date)
         try {
             val result = extractFromInvidious(videoId)
             if (result is AudioExtractionResult.Success) {
@@ -371,7 +371,7 @@ class PahuraYouTubeExtractor(
             e.printStackTrace()
         }
 
-        // Strategy 3: NewPipeExtractor
+        // Strategy 2: NewPipeExtractor
         try {
             val result = extractWithNewPipe(videoId)
             if (result is AudioExtractionResult.Success) {
@@ -382,7 +382,166 @@ class PahuraYouTubeExtractor(
             e.printStackTrace()
         }
 
+        // Strategy 3: Fast Multi-Node SaveNow / Loader conversion
+        try {
+            val result = extractFromLoaderAndSaveNow(videoId)
+            if (result is AudioExtractionResult.Success) {
+                streamCache[videoId] = result
+                return@withContext result
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
         AudioExtractionResult.Error("Could not resolve MP3 audio stream for this video.")
+    }
+
+    private fun getHealthyInvidiousInstances(): List<String> {
+        val now = System.currentTimeMillis()
+        synchronized(dynamicInstances) {
+            if (dynamicInstances.isNotEmpty() && (now - lastInstancesFetchTime < 3600_000L)) {
+                return dynamicInstances.toList()
+            }
+        }
+
+        val discovered = mutableListOf<String>()
+        try {
+            val req = Request.Builder()
+                .url("https://api.invidious.io/instances.json?sort_by=health")
+                .header("User-Agent", "Mozilla/5.0")
+                .build()
+            val resp = client.newCall(req).execute()
+            val body = resp.body?.string().orEmpty()
+            if (body.isNotBlank()) {
+                val array = JsonParser.parseString(body).asJsonArray
+                for (elem in array) {
+                    val item = elem.asJsonArray
+                    if (item.size() >= 2) {
+                        val domain = item[0].asString
+                        val info = item[1].asJsonObject
+                        val type = info.get("type")?.asString
+                        val uri = info.get("uri")?.asString
+                        val apiEnabled = info.get("api")?.asBoolean ?: false
+                        if (type == "https" && !uri.isNullOrBlank() && !domain.endsWith(".onion") && !domain.endsWith(".i2p")) {
+                            val cleanUri = uri.removeSuffix("/")
+                            if (apiEnabled) {
+                                discovered.add(0, cleanUri)
+                            } else {
+                                discovered.add(cleanUri)
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            // Ignore failure, fall back to known instances
+        }
+
+        val combined = LinkedHashSet<String>()
+        combined.add("https://yt.chocolatemoo53.com")
+        combined.addAll(discovered)
+        combined.addAll(staticFallbackInstances)
+
+        synchronized(dynamicInstances) {
+            dynamicInstances.clear()
+            dynamicInstances.addAll(combined)
+            lastInstancesFetchTime = now
+            return dynamicInstances.toList()
+        }
+    }
+
+    private fun extractFromInvidious(videoId: String): AudioExtractionResult {
+        val instances = getHealthyInvidiousInstances()
+
+        for (instance in instances) {
+            // Sub-strategy A: Direct audio stream redirect via /latest_version (Fastest & direct)
+            for (itag in listOf(140, 251)) {
+                try {
+                    val streamUrl = "$instance/latest_version?id=$videoId&itag=$itag"
+                    val testReq = Request.Builder()
+                        .url(streamUrl)
+                        .header("User-Agent", "Mozilla/5.0")
+                        .header("Range", "bytes=0-1024")
+                        .build()
+                    val testResp = client.newCall(testReq).execute()
+                    val code = testResp.code
+                    val contentType = testResp.header("Content-Type").orEmpty()
+                    val finalUrl = testResp.request.url.toString()
+                    testResp.close()
+
+                    if ((code == 200 || code == 206) &&
+                        (contentType.startsWith("audio/") || contentType.startsWith("video/") || finalUrl.contains("videoplayback"))
+                    ) {
+                        return AudioExtractionResult.Success(
+                            audioUrl = finalUrl,
+                            format = if (itag == 140) "m4a" else "opus",
+                            bitrate = if (itag == 140) 128 else 160
+                        )
+                    }
+                } catch (e: Exception) {
+                    // Try next
+                }
+            }
+
+            // Sub-strategy B: /api/v1/videos/$videoId JSON inspection
+            try {
+                val request = Request.Builder()
+                    .url("$instance/api/v1/videos/$videoId")
+                    .header("User-Agent", "Mozilla/5.0")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val resBody = response.body?.string().orEmpty()
+                if (resBody.isBlank()) continue
+                val json = JsonParser.parseString(resBody).asJsonObject
+
+                val adaptiveFormats = json.getAsJsonArray("adaptiveFormats")
+                if (adaptiveFormats != null) {
+                    var bestAudioUrl: String? = null
+                    var bestBitrate = 0
+                    var bestFormat = "m4a"
+
+                    for (f in adaptiveFormats) {
+                        val obj = f.asJsonObject
+                        val type = obj.get("type")?.asString.orEmpty()
+                        if (type.startsWith("audio/")) {
+                            val bitrate = obj.get("bitrate")?.asInt ?: 0
+                            val url = obj.get("url")?.asString.orEmpty()
+                            if (url.isNotBlank() && bitrate > bestBitrate) {
+                                bestBitrate = bitrate
+                                bestAudioUrl = url
+                                bestFormat = if (type.contains("mp4") || type.contains("m4a")) "m4a" else "opus"
+                            }
+                        }
+                    }
+
+                    if (bestAudioUrl != null) {
+                        try {
+                            val probeReq = Request.Builder()
+                                .url(bestAudioUrl)
+                                .header("User-Agent", "Mozilla/5.0")
+                                .header("Range", "bytes=0-512")
+                                .build()
+                            val probeResp = client.newCall(probeReq).execute()
+                            val pCode = probeResp.code
+                            probeResp.close()
+                            if (pCode == 200 || pCode == 206) {
+                                return AudioExtractionResult.Success(
+                                    audioUrl = bestAudioUrl,
+                                    format = bestFormat,
+                                    bitrate = bestBitrate / 1000
+                                )
+                            }
+                        } catch (e: Exception) {
+                            // Direct url probe failed, continue
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                // Continue to next instance
+            }
+        }
+        return AudioExtractionResult.Error("Invidious unavailable")
     }
 
     private fun extractFromLoaderAndSaveNow(videoId: String): AudioExtractionResult {
@@ -423,9 +582,9 @@ class PahuraYouTubeExtractor(
                     val progressUrl = json.get("progress_url")?.asString
                         ?: "https://lto2.affadaffa.com/api/progress?id=$id"
 
-                    // Poll progress endpoint
-                    for (i in 1..18) {
-                        Thread.sleep(1200)
+                    // Poll progress endpoint (quick max 4 attempts to avoid blocking UI)
+                    for (i in 1..4) {
+                        Thread.sleep(800)
                         try {
                             val pollReq = Request.Builder()
                                 .url(progressUrl)
@@ -455,60 +614,6 @@ class PahuraYouTubeExtractor(
             }
         }
         return AudioExtractionResult.Error("SaveNow/Loader unavailable")
-    }
-
-    private fun extractFromInvidious(videoId: String): AudioExtractionResult {
-        val instances = listOf(
-            "https://inv.nadeko.net",
-            "https://invidious.nerdvpn.de",
-            "https://yt.artemislena.eu",
-            "https://iv.ggtyler.dev",
-            "https://invidious.flokinet.to"
-        )
-
-        for (instance in instances) {
-            try {
-                val request = Request.Builder()
-                    .url("$instance/api/v1/videos/$videoId")
-                    .header("User-Agent", "Mozilla/5.0")
-                    .build()
-
-                val response = client.newCall(request).execute()
-                val resBody = response.body?.string().orEmpty()
-                if (resBody.isBlank()) continue
-                val json = JsonParser.parseString(resBody).asJsonObject
-
-                val adaptiveFormats = json.getAsJsonArray("adaptiveFormats")
-                if (adaptiveFormats != null) {
-                    var bestAudioUrl: String? = null
-                    var bestBitrate = 0
-
-                    for (f in adaptiveFormats) {
-                        val obj = f.asJsonObject
-                        val type = obj.get("type")?.asString.orEmpty()
-                        if (type.startsWith("audio/")) {
-                            val bitrate = obj.get("bitrate")?.asInt ?: 0
-                            val url = obj.get("url")?.asString.orEmpty()
-                            if (url.isNotBlank() && bitrate > bestBitrate) {
-                                bestBitrate = bitrate
-                                bestAudioUrl = url
-                            }
-                        }
-                    }
-
-                    if (bestAudioUrl != null) {
-                        return AudioExtractionResult.Success(
-                            audioUrl = bestAudioUrl,
-                            format = "m4a",
-                            bitrate = bestBitrate / 1000
-                        )
-                    }
-                }
-            } catch (e: Exception) {
-                // Continue
-            }
-        }
-        return AudioExtractionResult.Error("Invidious unavailable")
     }
 
     private fun extractWithNewPipe(videoId: String): AudioExtractionResult {
